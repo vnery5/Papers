@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="profile" href="http://gmpg.org/xfn/11">
+<link rel="pingback" href="https://bianchini.blog/xmlrpc.php">
+
+<title>Afinal, o teto de despesas reduziu os recursos da educação e saúde? &#8211; Blog do Bianchini</title>
+<meta name='robots' content='max-image-preview:large' />
+
+<!-- Async WordPress.com Remote Login -->
+<script id="wpcom_remote_login_js">
+var wpcom_remote_login_extra_auth = '';
+function wpcom_remote_login_remove_dom_node_id( element_id ) {
+	var dom_node = document.getElementById( element_id );
+	if ( dom_node ) { dom_node.parentNode.removeChild( dom_node ); }
+}
+function wpcom_remote_login_remove_dom_node_classes( class_name ) {
+	var dom_nodes = document.querySelectorAll( '.' + class_name );
+	for ( var i = 0; i < dom_nodes.length; i++ ) {
+		dom_nodes[ i ].parentNode.removeChild( dom_nodes[ i ] );
+	}
+}
+function wpcom_remote_login_final_cleanup() {
+	wpcom_remote_login_remove_dom_node_classes( "wpcom_remote_login_msg" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_remote_login_key" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_remote_login_validate" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_remote_login_js" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_request_access_iframe" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_request_access_styles" );
+}
+
+// Watch for messages back from the remote login
+window.addEventListener( "message", function( e ) {
+	if ( e.origin === "https://r-login.wordpress.com" ) {
+		var data = {};
+		try {
+			data = JSON.parse( e.data );
+		} catch( e ) {
+			wpcom_remote_login_final_cleanup();
+			return;
+		}
+
+		if ( data.msg === 'LOGIN' ) {
+			// Clean up the login check iframe
+			wpcom_remote_login_remove_dom_node_id( "wpcom_remote_login_key" );
+
+			var id_regex = new RegExp( /^[0-9]+$/ );
+			var token_regex = new RegExp( /^.*|.*|.*$/ );
+			if (
+				token_regex.test( data.token )
+				&& id_regex.test( data.wpcomid )
+			) {
+				// We have everything we need to ask for a login
+				var script = document.createElement( "script" );
+				script.setAttribute( "id", "wpcom_remote_login_validate" );
+				script.src = '/remote-login.php?wpcom_remote_login=validate'
+					+ '&wpcomid=' + data.wpcomid
+					+ '&token=' + encodeURIComponent( data.token )
+					+ '&host=' + window.location.protocol
+					+ '//' + window.location.hostname
+					+ '&postid=1298'
+					+ '&is_singular=1';
+				document.body.appendChild( script );
+			}
+
+			return;
+		}
+
+		// Safari ITP, not logged in, so redirect
+		if ( data.msg === 'LOGIN-REDIRECT' ) {
+			window.location = 'https://wordpress.com/log-in?redirect_to=' + window.location.href;
+			return;
+		}
+
+		// Safari ITP, storage access failed, remove the request
+		if ( data.msg === 'LOGIN-REMOVE' ) {
+			var css_zap = 'html { -webkit-transition: margin-top 1s; transition: margin-top 1s; } /* 9001 */ html { margin-top: 0 !important; } * html body { margin-top: 0 !important; } @media screen and ( max-width: 782px ) { html { margin-top: 0 !important; } * html body { margin-top: 0 !important; } }';
+			var style_zap = document.createElement( 'style' );
+			style_zap.type = 'text/css';
+			style_zap.appendChild( document.createTextNode( css_zap ) );
+			document.body.appendChild( style_zap );
+
+			var e = document.getElementById( 'wpcom_request_access_iframe' );
+			e.parentNode.removeChild( e );
+
+			document.cookie = 'wordpress_com_login_access=denied; path=/; max-age=31536000';
+
+			return;
+		}
+
+		// Safari ITP
+		if ( data.msg === 'REQUEST_ACCESS' ) {
+			console.log( 'request access: safari' );
+
+			// Check ITP iframe enable/disable knob
+			if ( wpcom_remote_login_extra_auth !== 'safari_itp_iframe' ) {
+				return;
+			}
+
+			// If we are in a "private window" there is no ITP.
+			var private_window = false;
+			try {
+				var opendb = window.openDatabase( null, null, null, null );
+			} catch( e ) {
+				private_window = true;
+			}
+
+			if ( private_window ) {
+				console.log( 'private window' );
+				return;
+			}
+
+			var iframe = document.createElement( 'iframe' );
+			iframe.id = 'wpcom_request_access_iframe';
+			iframe.setAttribute( 'scrolling', 'no' );
+			iframe.setAttribute( 'sandbox', 'allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-top-navigation-by-user-activation' );
+			iframe.src = 'https://r-login.wordpress.com/remote-login.php?wpcom_remote_login=request_access&origin=' + encodeURIComponent( data.origin ) + '&wpcomid=' + encodeURIComponent( data.wpcomid );
+
+			var css = 'html { -webkit-transition: margin-top 1s; transition: margin-top 1s; } /* 9001 */ html { margin-top: 46px !important; } * html body { margin-top: 46px !important; } @media screen and ( max-width: 660px ) { html { margin-top: 71px !important; } * html body { margin-top: 71px !important; } #wpcom_request_access_iframe { display: block; height: 71px !important; } } #wpcom_request_access_iframe { border: 0px; height: 46px; position: fixed; top: 0; left: 0; width: 100%; min-width: 100%; z-index: 99999; background: #23282d; } ';
+
+			var style = document.createElement( 'style' );
+			style.type = 'text/css';
+			style.id = 'wpcom_request_access_styles';
+			style.appendChild( document.createTextNode( css ) );
+			document.body.appendChild( style );
+
+			document.body.appendChild( iframe );
+		}
+
+		if ( data.msg === 'DONE' ) {
+			wpcom_remote_login_final_cleanup();
+		}
+	}
+}, false );
+
+// Inject the remote login iframe after the page has had a chance to load
+// more critical resources
+window.addEventListener( "DOMContentLoaded", function( e ) {
+	var iframe = document.createElement( "iframe" );
+	iframe.style.display = "none";
+	iframe.setAttribute( "scrolling", "no" );
+	iframe.setAttribute( "id", "wpcom_remote_login_key" );
+	iframe.src = "https://r-login.wordpress.com/remote-login.php"
+		+ "?wpcom_remote_login=key"
+		+ "&origin=aHR0cHM6Ly9iaWFuY2hpbmkuYmxvZw%3D%3D"
+		+ "&wpcomid=101840260"
+		+ "&time=1652967566";
+	document.body.appendChild( iframe );
+}, false );
+</script>
+<link rel='dns-prefetch' href='//s0.wp.com' />
+<link rel='dns-prefetch' href='//bianchiniblog.wordpress.com' />
+<link rel='dns-prefetch' href='//wordpress.com' />
+<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+<link rel='dns-prefetch' href='//s.pubmine.com' />
+<link rel='dns-prefetch' href='//x.bidswitch.net' />
+<link rel='dns-prefetch' href='//static.criteo.net' />
+<link rel='dns-prefetch' href='//ib.adnxs.com' />
+<link rel='dns-prefetch' href='//aax.amazon-adsystem.com' />
+<link rel='dns-prefetch' href='//bidder.criteo.com' />
+<link rel='dns-prefetch' href='//cas.criteo.com' />
+<link rel='dns-prefetch' href='//gum.criteo.com' />
+<link rel='dns-prefetch' href='//ads.pubmatic.com' />
+<link rel='dns-prefetch' href='//gads.pubmatic.com' />
+<link rel='dns-prefetch' href='//tpc.googlesyndication.com' />
+<link rel='dns-prefetch' href='//ad.doubleclick.net' />
+<link rel='dns-prefetch' href='//googleads.g.doubleclick.net' />
+<link rel='dns-prefetch' href='//www.googletagservices.com' />
+<link rel='dns-prefetch' href='//cdn.switchadhub.com' />
+<link rel='dns-prefetch' href='//delivery.g.switchadhub.com' />
+<link rel='dns-prefetch' href='//delivery.swid.switchadhub.com' />
+<link rel='dns-prefetch' href='//a.teads.tv' />
+<link rel='dns-prefetch' href='//prebid.media.net' />
+<link rel='dns-prefetch' href='//adserver-us.adtech.advertising.com' />
+<link rel='dns-prefetch' href='//fastlane.rubiconproject.com' />
+<link rel='dns-prefetch' href='//prebid-server.rubiconproject.com' />
+<link rel='dns-prefetch' href='//hb-api.omnitagjs.com' />
+<link rel='dns-prefetch' href='//mtrx.go.sonobi.com' />
+<link rel='dns-prefetch' href='//apex.go.sonobi.com' />
+<link rel='dns-prefetch' href='//u.openx.net' />
+<link href='https://fonts.gstatic.com' crossorigin rel='preconnect' />
+<link rel="alternate" type="application/rss+xml" title="Feed para Blog do Bianchini &raquo;" href="https://bianchini.blog/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Feed de comentários para Blog do Bianchini &raquo;" href="https://bianchini.blog/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Feed de comentários para Blog do Bianchini &raquo; Afinal, o teto de despesas reduziu os recursos da educação e&nbsp;saúde?" href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/feed/" />
+	<script type="text/javascript">
+		/* <![CDATA[ */
+		function addLoadEvent(func) {
+			var oldonload = window.onload;
+			if (typeof window.onload != 'function') {
+				window.onload = func;
+			} else {
+				window.onload = function () {
+					oldonload();
+					func();
+				}
+			}
+		}
+		/* ]]> */
+	</script>
+	<script type="text/javascript">
+window._wpemojiSettings = {"baseUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/wpcom-smileys\/twemoji\/2\/72x72\/","ext":".png","svgUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/wpcom-smileys\/twemoji\/2\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/s0.wp.com\/wp-includes\/js\/wp-emoji-release.min.js?m=1652185836h&ver=6.0-beta2-53270"}};
+/*! This file is auto-generated */
+!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){var a=String.fromCharCode,e=(p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,e),0,0),i.toDataURL());return p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,t),0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(!p||!p.fillText)return!1;switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])?!1:!s([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!s([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]);case"emoji":return!s([129777,127995,8205,129778,127999],[129777,127995,8203,129778,127999])}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(e=t.source||{}).concatemoji?c(e.concatemoji):e.wpemoji&&e.twemoji&&(c(e.twemoji),c(e.wpemoji)))}(window,document,window._wpemojiSettings);
+</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 0.07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel='stylesheet' id='all-css-0-1' href='https://s0.wp.com/_static/??-eJyFUVtuwyAQvFDxyk7q9qfqWXis0CYLWCzE4vYlUZOmiax8jubB7ADromyKBWOBUNXC1VMUWBebgpJAjO0BDVbkDTZs5DwWAaydTUdCxXqFgmFhXVBASmN8CjCc/F9Eyk47Ac/JaH7SXmW+dmgw+85khNO4G6ZhBFOJ3TnQHhWTyTq3h0cpWq6udzkIBHSkkTFczrgDvW7DrBi9tm0IFF/bO3eP/5m2y1+a9jAsiz5X1i3Vonwmt7HVy4isC0W/NfXVbtOvrY/2OYxKqH8RqoynPqIjKTeFugV9h69xfp8+dtM87w8/7sDUxA==?cssminify=yes' type='text/css' media='all' />
+<style id='wp-block-library-inline-css'>
+.has-text-align-justify {
+	text-align:justify;
+}
+</style>
+<style id='global-styles-inline-css'>
+body{--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--duotone--dark-grayscale: url('#wp-duotone-dark-grayscale');--wp--preset--duotone--grayscale: url('#wp-duotone-grayscale');--wp--preset--duotone--purple-yellow: url('#wp-duotone-purple-yellow');--wp--preset--duotone--blue-red: url('#wp-duotone-blue-red');--wp--preset--duotone--midnight: url('#wp-duotone-midnight');--wp--preset--duotone--magenta-yellow: url('#wp-duotone-magenta-yellow');--wp--preset--duotone--purple-green: url('#wp-duotone-purple-green');--wp--preset--duotone--blue-orange: url('#wp-duotone-blue-orange');--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+</style>
+<link rel='stylesheet' id='all-css-2-1' href='https://s0.wp.com/_static/??-eJx9zEEOwkAIBdALiaTWaDfGs7QjUXSYIYVJr18aExfGuCHw4YGLQqrFqThKA83tzsUw1ZkiFx0d40LoxiNlkjjbJ7Md/maLhoFp0pnMIKpwE/BHQPvnQm2vIfOLYrKv5E0ZS3UObZ9mW1zl0h3703noD0P3XAFDZ01X?cssminify=yes' type='text/css' media='all' />
+<link crossorigin="anonymous" rel='stylesheet' id='sequential-montserrat-css'  href='https://fonts.googleapis.com/css?family=Montserrat%3A400%2C700' media='all' />
+<link crossorigin="anonymous" rel='stylesheet' id='sequential-open-sans-css'  href='https://fonts.googleapis.com/css?family=Open+Sans%3A300italic%2C400italic%2C600italic%2C700italic%2C300%2C400%2C600%2C700&#038;subset=latin%2Clatin-ext' media='all' />
+<link crossorigin="anonymous" rel='stylesheet' id='sequential-source-code-pro-css'  href='https://fonts.googleapis.com/css?family=Source+Code+Pro%3A400%2C700' media='all' />
+<link rel='stylesheet' id='all-css-8-1' href='https://s0.wp.com/_static/??-eJyNjtEKwjAMRX/Imm0w8UX8lq7EGkmTurQM/96KLxui+HZv7jkQWLILKgWlQKouc40kBhEFZ2rDl7gPZjtYueWKCQ1yncDwXtuJPIOVB+OfLEl4827JQdOHtflOHWvwhVQ2xV3Y0/xLnXFijS1GaNSqvqRzOvXj0A3H7tCPtycYKWo2?cssminify=yes' type='text/css' media='all' />
+<link rel='stylesheet' id='print-css-9-1' href='https://s0.wp.com/wp-content/mu-plugins/global-print/global-print.css?m=1465851035h&cssminify=yes' type='text/css' media='print' />
+<style id='jetpack-global-styles-frontend-style-inline-css'>
+:root { --font-headings: unset; --font-base: unset; --font-headings-default: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif; --font-base-default: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;}
+</style>
+<link rel='stylesheet' id='all-css-12-1' href='https://s0.wp.com/_static/??-eJxti0EKgCAQAD+UbVFGHaK3mJgaqyut0vejQ4eo0zAwA2cSmmI2MUMoImGxPjIk4iw2VP4Adurw0T6sNXMF/xeT9goFkqW3fKbsTDAMrgeLtCq8gyXM7dCNUjZy6vcLZTc31Q==?cssminify=yes' type='text/css' media='all' />
+<script id='media-video-jwt-bridge-js-extra'>
+var videopressAjax = {"ajaxUrl":"https:\/\/bianchiniblog.wordpress.com\/wp-admin\/admin-ajax.php","bridgeUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/videopress\/js\/videopress-token-bridge.js","post_id":"1298"};
+</script>
+<script id='wpcom-actionbar-placeholder-js-extra'>
+var actionbardata = {"siteID":"101840260","siteURL":"https:\/\/bianchini.blog","xhrURL":"https:\/\/bianchini.blog\/wp-admin\/admin-ajax.php","nonce":"af2db8373c","isLoggedIn":"","statusMessage":"","subsEmailDefault":"instantly","proxyScriptUrl":"https:\/\/s0.wp.com\/wp-content\/js\/wpcom-proxy-request.js?ver=20211021","shortlink":"https:\/\/wp.me\/p6TjiQ-kW","i18n":{"followedText":"Novos posts deste site agora aparecer\u00e3o no seu <a href=\"https:\/\/wordpress.com\/read\">Leitor<\/a>","foldBar":"Esconder esta barra","unfoldBar":"Mostrar esta barra"}};
+</script>
+<script crossorigin='anonymous' type='text/javascript' src='https://s0.wp.com/_static/??-eJyFjUsOwjAMBS+EGxWJUhaIs/RjIofEDk5S6O0piApYsbKeZ+xnbhEG4YycjUsmSE8eoSTUzi47ID5L5dLG/HrqM0SV+7wy4sGXEdMTumtBnd+jCsR/JQhktcv4La9toUD0xRInM9GIEhXT68MnQZYLMvRKo8Xl/hSOdbPb7g912zbuAQmmVCk='></script>
+<script type='text/javascript'>
+	window.addEventListener( 'DOMContentLoaded', function() {
+		rltInitialize( {"token":null,"iframeOrigins":["https:\/\/widgets.wp.com"]} );
+	} );
+</script>
+<link rel='stylesheet' id='all-css-0-2' href='https://s0.wp.com/wp-content/mu-plugins/highlander-comments/style.css?m=1650315457h&cssminify=yes' type='text/css' media='all' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://bianchiniblog.wordpress.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://s0.wp.com/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress.com" />
+<link rel="canonical" href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/" />
+<link rel='shortlink' href='https://wp.me/p6TjiQ-kW' />
+<link rel="alternate" type="application/json+oembed" href="https://public-api.wordpress.com/oembed/?format=json&amp;url=https%3A%2F%2Fbianchini.blog%2F2022%2F03%2F29%2Fafinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude%2F&amp;for=wpcom-auto-discovery" /><link rel="alternate" type="application/xml+oembed" href="https://public-api.wordpress.com/oembed/?format=xml&amp;url=https%3A%2F%2Fbianchini.blog%2F2022%2F03%2F29%2Fafinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude%2F&amp;for=wpcom-auto-discovery" />
+<!-- Jetpack Open Graph Tags -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Afinal, o teto de despesas reduziu os recursos da educação e saúde?" />
+<meta property="og:url" content="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/" />
+<meta property="og:description" content="A emenda constitucional 95/2016 introduziu o novo regime fiscal, que limitou as despesas primárias da União ao valor real de 2016 e modificou os valores mínimos a serem aplicados em manutenção e de…" />
+<meta property="article:published_time" content="2022-03-29T20:40:00+00:00" />
+<meta property="article:modified_time" content="2022-03-29T18:35:01+00:00" />
+<meta property="og:site_name" content="Blog do Bianchini" />
+<meta property="og:image" content="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png" />
+<meta property="og:image:width" content="700" />
+<meta property="og:image:height" content="421" />
+<meta property="og:image:alt" content="" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="article:publisher" content="https://www.facebook.com/WordPresscom" />
+<meta name="twitter:text:title" content="Afinal, o teto de despesas reduziu os recursos da educação e&nbsp;saúde?" />
+<meta name="twitter:image" content="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=640" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<!-- End Jetpack Open Graph Tags -->
+<link rel="shortcut icon" type="image/x-icon" href="https://secure.gravatar.com/blavatar/bab94f09b8212847d5ad2b149abfbb5b?s=32" sizes="16x16" />
+<link rel="icon" type="image/x-icon" href="https://secure.gravatar.com/blavatar/bab94f09b8212847d5ad2b149abfbb5b?s=32" sizes="16x16" />
+<link rel="apple-touch-icon" href="https://secure.gravatar.com/blavatar/bab94f09b8212847d5ad2b149abfbb5b?s=114" />
+<link rel='openid.server' href='https://bianchini.blog/?openidserver=1' />
+<link rel='openid.delegate' href='https://bianchini.blog/' />
+<link rel="search" type="application/opensearchdescription+xml" href="https://bianchini.blog/osd.xml" title="Blog do Bianchini" />
+<link rel="search" type="application/opensearchdescription+xml" href="https://s1.wp.com/opensearch.xml" title="WordPress.com" />
+<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>		<style type="text/css">
+			.recentcomments a {
+				display: inline !important;
+				padding: 0 !important;
+				margin: 0 !important;
+			}
+
+			table.recentcommentsavatartop img.avatar, table.recentcommentsavatarend img.avatar {
+				border: 0px;
+				margin: 0;
+			}
+
+			table.recentcommentsavatartop a, table.recentcommentsavatarend a {
+				border: 0px !important;
+				background-color: transparent !important;
+			}
+
+			td.recentcommentsavatarend, td.recentcommentsavatartop {
+				padding: 0px 0px 1px 0px;
+				margin: 0px;
+			}
+
+			td.recentcommentstextend {
+				border: none !important;
+				padding: 0px 0px 2px 10px;
+			}
+
+			.rtl td.recentcommentstextend {
+				padding: 0px 10px 2px 0px;
+			}
+
+			td.recentcommentstexttop {
+				border: none;
+				padding: 0px 0px 0px 10px;
+			}
+
+			.rtl td.recentcommentstexttop {
+				padding: 0px 10px 0px 0px;
+			}
+		</style>
+		<meta name="application-name" content="Blog do Bianchini" /><meta name="msapplication-window" content="width=device-width;height=device-height" /><meta name="msapplication-tooltip" content="Espaço para discussão de economia, políticas públicas e política" /><meta name="msapplication-task" content="name=Assinar;action-uri=https://bianchini.blog/feed/;icon-uri=https://secure.gravatar.com/blavatar/bab94f09b8212847d5ad2b149abfbb5b?s=16" /><meta name="msapplication-task" content="name=Registre um blog gratuito;action-uri=http://wordpress.com/signup/;icon-uri=https://s0.wp.com/i/favicon.ico" /><meta name="msapplication-task" content="name=Suporte do WordPress.com;action-uri=http://support.wordpress.com/;icon-uri=https://s0.wp.com/i/favicon.ico" /><meta name="msapplication-task" content="name=WordPress.com Fóruns;action-uri=http://forums.wordpress.com/;icon-uri=https://s0.wp.com/i/favicon.ico" /><meta name="description" content="A emenda constitucional 95/2016 introduziu o novo regime fiscal, que limitou as despesas primárias da União ao valor real de 2016 e modificou os valores mínimos a serem aplicados em manutenção e desenvolvimento do ensino (MDE) e ações e serviços públicos de saúde (ASPS) por 20 anos. Após meia década de sua aprovação, quais os&hellip;" />
+		<script type="text/javascript">
+
+			window.doNotSellCallback = function() {
+
+				var linkElements = [
+					'a[href="https://wordpress.com/?ref=footer_blog"]',
+					'a[href="https://wordpress.com/?ref=footer_website"]',
+					'a[href="https://wordpress.com/?ref=vertical_footer"]',
+					'a[href^="https://wordpress.com/?ref=footer_segment_"]',
+				].join(',');
+
+				var dnsLink = document.createElement( 'a' );
+				dnsLink.href = 'https://wordpress.com/pt-br/advertising-program-optout/';
+				dnsLink.classList.add( 'do-not-sell-link' );
+				dnsLink.rel = 'nofollow';
+				dnsLink.style.marginLeft = '0.5em';
+				dnsLink.textContent = 'Não venda minhas informações pessoais';
+
+				var creditLinks = document.querySelectorAll( linkElements );
+
+				if ( 0 === creditLinks.length ) {
+					return false;
+				}
+
+				Array.prototype.forEach.call( creditLinks, function( el ) {
+					el.insertAdjacentElement( 'afterend', dnsLink );
+				});
+
+				return true;
+			};
+
+		</script>
+				<script type="text/javascript">
+		function __ATA_CC() {var v = document.cookie.match('(^|;) ?personalized-ads-consent=([^;]*)(;|$)');return v ? 1 : 0;}
+		var __ATA_PP = { 'pt': 1, 'ht': 0, 'tn': 'sequential', 'uloggedin': 0, 'amp': false, 'consent': __ATA_CC(), 'gdpr_applies': false, 'ad': { 'label': { 'text': 'Anúncios' }, 'reportAd': { 'text': 'Denunciar este anúncio' } }, 'siteid': 8982, 'blogid': 101840260 };
+		var __ATA = __ATA || {};
+		__ATA.cmd = __ATA.cmd || [];
+		__ATA.criteo = __ATA.criteo || {};
+		__ATA.criteo.cmd = __ATA.criteo.cmd || [];
+		</script>
+		<script type="text/javascript">
+		(function(){var g=Date.now||function(){return+new Date};function h(a,b){a:{for(var c=a.length,d="string"==typeof a?a.split(""):a,e=0;e<c;e++)if(e in d&&b.call(void 0,d[e],e,a)){b=e;break a}b=-1}return 0>b?null:"string"==typeof a?a.charAt(b):a[b]};function k(a,b,c){c=null!=c?"="+encodeURIComponent(String(c)):"";if(b+=c){c=a.indexOf("#");0>c&&(c=a.length);var d=a.indexOf("?");if(0>d||d>c){d=c;var e=""}else e=a.substring(d+1,c);a=[a.substr(0,d),e,a.substr(c)];c=a[1];a[1]=b?c?c+"&"+b:b:c;a=a[0]+(a[1]?"?"+a[1]:"")+a[2]}return a};var l=0;function m(a,b){var c=document.createElement("script");c.src=a;c.onload=function(){b&&b(void 0)};c.onerror=function(){b&&b("error")};a=document.getElementsByTagName("head");var d;a&&0!==a.length?d=a[0]:d=document.documentElement;d.appendChild(c)}function n(a){var b=void 0===b?document.cookie:b;return(b=h(b.split("; "),function(c){return-1!=c.indexOf(a+"=")}))?b.split("=")[1]:""}function p(a){return"string"==typeof a&&0<a.length}
+		function r(a,b,c){b=void 0===b?"":b;c=void 0===c?".":c;var d=[];Object.keys(a).forEach(function(e){var f=a[e],q=typeof f;"object"==q&&null!=f||"function"==q?d.push(r(f,b+e+c)):null!==f&&void 0!==f&&(e=encodeURIComponent(b+e),d.push(e+"="+encodeURIComponent(f)))});return d.filter(p).join("&")}function t(a,b){a||((window.__ATA||{}).config=b.c,m(b.url))}var u=Math.floor(1E13*Math.random()),v=window.__ATA||{};window.__ATA=v;window.__ATA.cmd=v.cmd||[];v.rid=u;v.createdAt=g();var w=window.__ATA||{},x="s.pubmine.com";
+		w&&w.serverDomain&&(x=w.serverDomain);var y="//"+x+"/conf",z=window.top===window,A=window.__ATA_PP&&window.__ATA_PP.gdpr_applies,B="boolean"===typeof A?Number(A):null,C=window.__ATA_PP||null,D=z?document.referrer?document.referrer:null:null,E=z?window.location.href:document.referrer?document.referrer:null,F,G=n("__ATA_tuuid");F=G?G:null;var H=window.innerWidth+"x"+window.innerHeight,I=n("usprivacy"),J=r({gdpr:B,pp:C,rid:u,src:D,ref:E,tuuid:F,vp:H,us_privacy:I?I:null},"",".");
+		(function(a){var b=void 0===b?"cb":b;l++;var c="callback__"+g().toString(36)+"_"+l.toString(36);a=k(a,b,c);window[c]=function(d){t(void 0,d)};m(a,function(d){d&&t(d)})})(y+"?"+J);}).call(this);
+		</script><link rel="amphtml" href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/amp/"><style type="text/css" id="custom-colors-css">	#comments #respond p.form-submit input#comment-submit,
+	.widget_flickr #flickr_badge_uber_wrapper td a:last-child {
+		background: #e2e2e2 !important;
+		color: #424242 !important;
+	}
+	#comments #respond p.form-submit input#comment-submit:hover,
+	#comments #respond p.form-submit input#comment-submit:focus,
+	#comments #respond p.form-submit input#comment-submit:active,
+	.widget_flickr #flickr_badge_uber_wrapper td a:last-child:hover,
+	.widget_flickr #flickr_badge_uber_wrapper td a:last-child:focus,
+	.widget_flickr #flickr_badge_uber_wrapper td a:last-child:active {
+		color: #fff !important;
+	}
+	.footer-widget-area .widget_flickr #flickr_badge_uber_wrapper td a:last-child {
+		background: rgba(255, 255, 255, 0.75) !important;
+		color: #424242 !important;
+	}
+	.footer-widget-area .widget_flickr #flickr_badge_uber_wrapper td a:last-child:hover,
+	.footer-widget-area .widget_flickr #flickr_badge_uber_wrapper td a:last-child:focus,
+	.footer-widget-area .widget_flickr #flickr_badge_uber_wrapper td a:last-child:active {
+		background: #fff !important;
+	}
+.widget_tag_cloud a,
+		.wp_widget_tag_cloud a { background-color: #E51D3B;}
+a,
+		h1 a:hover,
+		h1 a:focus,
+		h1 a:active,
+		h2 a:hover,
+		h2 a:focus,
+		h2 a:active,
+		h3 a:hover,
+		h3 a:focus,
+		h3 a:active,
+		h4 a:hover,
+		h4 a:focus,
+		h4 a:active,
+		h5 a:hover,
+		h5 a:focus,
+		h5 a:active,
+		h6 a:hover,
+		h6 a:focus,
+		h6 a:active,
+		ul[id^="menu-social"] a:before,
+		.footer-widget-area .widget_tag_cloud a:hover,
+		.footer-widget-area .widget_tag_cloud a:focus,
+		.footer-widget-area .widget_tag_cloud a:active,
+		.format-link .entry-title a:after,
+		.comment .fn a:hover,
+		.comment .fn a:focus,
+		.comment .fn a:active,
+		.site .wp-playlist-light .wp-playlist-playing,
+		#page .PDS_Poll .pds-links a,
+		.widget_goodreads div[class^="gr_custom_container"] a,
+		.footer-widget-area .wp_widget_tag_cloud a:hover,
+		.footer-widget-area .wp_widget_tag_cloud a:focus,
+		.footer-widget-area .wp_widget_tag_cloud a:active { color: #E51D3B;}
+mark,
+		ins,
+		button,
+		input[type="button"],
+		input[type="reset"],
+		input[type="submit"],
+		.search-form:before,
+		a.button,
+		a.button-minimal:hover,
+		a.button-minimal:focus,
+		a.button-minimal:active,
+		.menu-primary,
+		.dropdown-toggle:before,
+		.site-header,
+		.footer-navigation,
+		.site-footer,
+		.hero,
+		.bypostauthor > .comment-body .fn,
+		#infinite-footer .container,
+		#infinite-handle span,
+		.sd-social.sd-social-icon a:before,
+		.hero .sd-social.sd-social-icon .sharing-hidden a:before,
+		#page .PDS_Poll .pds-vote-button,
+		.widget_akismet_widget .a-stats a,
+		.milestone-widget .milestone-header { background-color: #055692;}
+a.button-minimal { border-color: #055692;}
+.main-navigation.toggled .menu-primary,
+		.sub-menu.toggle-on { border-top-color: #055692;}
+.main-navigation li { border-bottom-color: #055692;}
+a.button-minimal,
+		.footer-widget-area a.button,
+		.hero a.button,
+		.site-header a.button,
+		.footer-widget-area a.button-minimal:hover,
+		.footer-widget-area a.button-minimal:focus,
+		.footer-widget-area a.button-minimal:active,
+		.hero a.button-minimal:hover,
+		.hero a.button-minimal:focus,
+		.hero a.button-minimal:active,
+		.site-header a.button-minimal:hover,
+		.site-header a.button-minimal:focus,
+		.site-header a.button-minimal:active,
+		.hero .sd-social.sd-social-icon a:before,
+		.footer-widget-area .widget_akismet_widget .a-stats a,
+		.footer-widget-area .widget_akismet_widget .a-stats .count,
+		.footer-widget-area .widget_flickr #flickr_badge_uber_wrapper td a:last-child,
+		.footer-widget-area .milestone-widget .milestone-header { color: #055692;}
+</style>
+<script type="text/javascript">
+	window.google_analytics_uacct = "UA-52447-2";
+</script>
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-52447-2']);
+	_gaq.push(['_gat._anonymizeIp']);
+	_gaq.push(['_setDomainName', 'none']);
+	_gaq.push(['_setAllowLinker', true]);
+	_gaq.push(['_initData']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+	})();
+</script>
+</head>
+
+<body class="post-template-default single single-post postid-1298 single-format-standard customizer-styles-applied highlander-enabled highlander-light">
+<div id="page" class="hfeed site">
+	<a class="skip-link screen-reader-text" href="#content">Pular para o conteúdo</a>
+
+	<header id="masthead" class="site-header" role="banner">
+				<div class="wrapper">
+			<div class="site-branding">
+				<a href="https://bianchini.blog/" class="site-logo-link" rel="home" itemprop="url"></a>				<h1 class="site-title"><a href="https://bianchini.blog/" rel="home">Blog do Bianchini</a></h1>
+				<h2 class="site-description">Espaço para discussão de economia, políticas públicas e política</h2>
+			</div>
+
+			
+					</div><!-- .wrapper -->
+			</header><!-- #masthead -->
+
+	<div id="content" class="site-content">
+
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main" role="main">
+
+			
+				
+<article id="post-1298" class="post-1298 post type-post status-publish format-standard has-post-thumbnail hentry category-ajuste-fiscal category-novo-regime-fiscal category-pec-241">
+	
+			<div class="post-thumbnail">
+			<img width="752" height="452" src="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=752" class="attachment-sequential-featured-image size-sequential-featured-image wp-post-image" alt="" srcset="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png 752w, https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=150 150w, https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=300 300w" sizes="(max-width: 752px) 100vw, 752px" data-attachment-id="1303" data-permalink="https://bianchini.blog/image-1/" data-orig-file="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png" data-orig-size="752,452" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="image-1" data-image-description="" data-image-caption="" data-medium-file="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=300" data-large-file="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=700" />		</div>
+	
+
+	<header class="entry-header">
+		<div class="entry-meta">
+			<span class="posted-on"><a href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/" rel="bookmark"><time class="entry-date published" datetime="2022-03-29T17:40:00-03:00">29 de março de 2022</time><time class="updated" datetime="2022-03-29T15:35:01-03:00">29 de março de 2022</time></a></span> <span class="byline"><span class="author vcard"><a class="url fn n" href="https://bianchini.blog/author/rafaelbianchinipaiva/">Rafael</a></span></span> 		</div><!-- .entry-meta -->
+
+		<h1 class="entry-title">Afinal, o teto de despesas reduziu os recursos da educação e&nbsp;saúde?</h1>	</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		
+<p>A emenda constitucional 95/2016 introduziu o <a href="https://bianchini.blog/2016/10/15/o-novo-regime-fiscal-e-as-vinculacoes-de-despesas-com-saude-e-educacao/">novo regime fiscal</a>, que limitou as despesas primárias da União ao valor real de 2016 e modificou os valores mínimos a serem aplicados em manutenção e desenvolvimento do ensino (MDE) e ações e serviços públicos de saúde (ASPS) por 20 anos. Após meia década de sua aprovação, quais os resultados efetivamente observados?</p>
+
+
+
+<ol type="I"><li><strong>Despesas primárias reais da União</strong></li></ol>
+
+
+
+<p>Com exceção do ano de 2020, quando a EC 106/2020 instituiu o regime extraordinário fiscal, permitindo a realização de despesas para enfrentamento de calamidade pública nacional decorrente de pandemia da Covid-19, as despesas primárias reais da União têm se mantido no mesmo patamar desde 2015: em 2021, a despesa real foi 4,6% maior que a de 2014. A maior parte desse aumento real se deu em 2019, quando uma interpretação criativa da equipe econômica sancionada pelos órgãos de controle permitiu que uma receita extraordinária de concessões de mais de R$ 80 bilhões obtida em dezembro fosse gasta ainda naquele ano (vide item IV), resultando em despesa real 3,7% maior que a de 2016. Como o teto de despesas é calculado a partir do ano anterior, o aumento real de 2019 elevou o teto de despesas de 2021 em diante (Gráfico 1). </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://bianchiniblog.files.wordpress.com/2022/03/image.png"><img data-attachment-id="1301" data-permalink="https://bianchini.blog/image/" data-orig-file="https://bianchiniblog.files.wordpress.com/2022/03/image.png" data-orig-size="752,407" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="image" data-image-description="" data-image-caption="" data-medium-file="https://bianchiniblog.files.wordpress.com/2022/03/image.png?w=300" data-large-file="https://bianchiniblog.files.wordpress.com/2022/03/image.png?w=700" src="https://bianchiniblog.files.wordpress.com/2022/03/image.png?w=752" alt="" class="wp-image-1301" srcset="https://bianchiniblog.files.wordpress.com/2022/03/image.png 752w, https://bianchiniblog.files.wordpress.com/2022/03/image.png?w=150 150w, https://bianchiniblog.files.wordpress.com/2022/03/image.png?w=300 300w" sizes="(max-width: 752px) 100vw, 752px" /></a></figure>
+
+
+
+<p>Fonte: <a href="https://www.gov.br/tesouronacional/pt-br/estatisticas-fiscais-e-planejamento/resultado-do-tesouro-nacional-rtn">Secretaria do Tesouro Nacional (STN)</a></p>
+
+
+
+<p><strong>Portanto, a estabilização da despesa primária real da União teve início 2 anos antes do teto de despesas, sendo que este não impediu aumento da despesa primária real da União a partir de 2019.</strong></p>
+
+
+
+<ol type="I"><li><strong>Despesas com manutenção e desenvolvimento do ensino (MDE)</strong></li></ol>
+
+
+
+<p>Além do teto real de despesas, a EC 96/2016 também modifica, durante sua vigência, o montante mínimo que a União deve gastar com MDE: em vez de 18% da receita líquida de impostos do ano corrente, o valor real correspondente a 18% da receita líquida de impostos de 2016. Como no longo prazo a receita real de impostos tende a crescer, aumentando com isso os recursos mínimos a serem aplicados em MDE, a mudança visou a impedir que a vinculação de despesas com educação inviabilizasse o cumprimento do teto de despesas.</p>
+
+
+
+<p>Como consequência do elevado patamar inicial de despesas com MDE e do teto de despesas, as despesas com MDE caíram anualmente como proporção da receita líquida de impostos, com exceção de 2020. Entretanto, somente em 2021 as despesas com MDE foram menores que os 18% da receita líquida de impostos preconizados pelo art. 212 da Constituição Federal (Gráfico 2). Ainda assim, em montante inferior a R$ 0,5 bilhão.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png"><img data-attachment-id="1303" data-permalink="https://bianchini.blog/image-1/" data-orig-file="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png" data-orig-size="752,452" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="image-1" data-image-description="" data-image-caption="" data-medium-file="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=300" data-large-file="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=700" src="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=752" alt="" class="wp-image-1303" srcset="https://bianchiniblog.files.wordpress.com/2022/03/image-1.png 752w, https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=150 150w, https://bianchiniblog.files.wordpress.com/2022/03/image-1.png?w=300 300w" sizes="(max-width: 752px) 100vw, 752px" /></a></figure>
+
+
+
+<p>Fonte: STN – <a href="https://www.tesourotransparente.gov.br/publicacoes/relatorio-resumido-da-execucao-orcamentaria-rreo/2021/12?ano_selecionado=2021">Relatório Resumido de Execução Orçamentária (RREO)</a></p>
+
+
+
+<p><strong>Em outras palavras, embora as despesas reais com educação da União estejam em queda desde 2017, foi somente no ano passado que ficaram abaixo do mínimo estipulado pelo art. 212 da Constituição – por pequena margem. Essa distância tende a se aprofundar nos próximos anos.</strong></p>
+
+
+
+<ol type="I"><li><strong>Despesas com ações e serviços públicos de saúde (ASPS)</strong></li></ol>
+
+
+
+<p>No caso das ASPS, a sistemática de aplicação de recursos era um pouco mais complexa, pois a EC 86/2015 havia estabelecido um cronograma gradual de implementação dos gastos mínimos com ASPS, de 13,2% da Receita Corrente Líquida (RCL) em 2016 para 15% da RCL a partir de 2020. O novo regime fiscal determinou que a aplicação mínima em ASPS fosse equivalente ao valor real de 15% da RCL de 2017.</p>
+
+
+
+<p>Já as despesas com ASPS foram inferiores ao valor mínimo estipulado pela sistemática anterior apenas em 2019, quando foram gastos 13,4% da RCL em vez dos 14,5% estimulados na EC 86/2015, diferença que corresponde a R$ 10,2 bilhões (valor não atualizado). Em parte, devido à queda de receitas causada pela recessão de 2020, em parte devido ao esperado aumento de despesas com saúde em uma pandemia, as despesas com ASPS foram superiores a 15% da RCL em 2020 e 2021 (Gráfico 3).</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://bianchiniblog.files.wordpress.com/2022/03/image-2.png"><img data-attachment-id="1304" data-permalink="https://bianchini.blog/image-2/" data-orig-file="https://bianchiniblog.files.wordpress.com/2022/03/image-2.png" data-orig-size="752,452" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="image-2" data-image-description="" data-image-caption="" data-medium-file="https://bianchiniblog.files.wordpress.com/2022/03/image-2.png?w=300" data-large-file="https://bianchiniblog.files.wordpress.com/2022/03/image-2.png?w=700" src="https://bianchiniblog.files.wordpress.com/2022/03/image-2.png?w=752" alt="" class="wp-image-1304" srcset="https://bianchiniblog.files.wordpress.com/2022/03/image-2.png 752w, https://bianchiniblog.files.wordpress.com/2022/03/image-2.png?w=150 150w, https://bianchiniblog.files.wordpress.com/2022/03/image-2.png?w=300 300w" sizes="(max-width: 752px) 100vw, 752px" /></a></figure>
+
+
+
+<p>Fonte: STN – <a href="https://www.tesourotransparente.gov.br/publicacoes/relatorio-resumido-da-execucao-orcamentaria-rreo/2021/12?ano_selecionado=2021">RREO</a></p>
+
+
+
+<p><strong>Em suma, não fosse a pandemia, o teto de despesas teria reduzido os gastos com saúde da União para valores inferiores aos mínimos estipulados pela EC 86/2015. Por essa razão, espera-se que, com o fim da pandemia, as despesas com saúde caiam abaixo do estipulado pelo art. 198 da Constituição Federal.</strong></p>
+
+
+
+<ol type="I"><li><strong>Despesas discricionárias e sujeitas a controle de fluxo</strong></li></ol>
+
+
+
+<p>Como a maior parte das despesas da União é obrigatória, irredutível por determinação constitucional e/ou tende a crescer vegetativamente com o envelhecimento da população, uma consequência da manutenção do patamar real das despesas primárias da União desde 2015 (vide item I) tem sido a incidência de ajuste em despesas obrigatórias sujeitas a controle de fluxo ou discricionárias, como investimentos, desde aquele ano. Como <a href="https://bianchini.blog/2019/05/16/diversas-restricoes-fiscais-convergem-para-os-cortes-na-educacao/">expliquei neste Blog</a>, em 2019 isso foi um elemento fundamental dos cortes em recursos destinados às universidades federais que motivaram diversas manifestações contra o governo.</p>
+
+
+
+<p>A trajetória de queda das despesas discricionárias como proporção das despesas totais foi interrompida com o aumento de despesas possibilitado pelas receitas extraordinárias de dezembro de 2019 (vide item I). O regime extraordinário fiscal, que possibilitou expansão fiscal sem precedentes, distorceu essa comparação porque a maior parte das despesas criadas foi obrigatória, como o auxílio emergencial. Em 2021, as despesas obrigatórias com controles de fluxo e as discricionárias foram 16,7% das despesas primárias da União, menor valor da série histórica, considerando que os números de 2020 foram atípicos (Gráfico 4).</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://bianchiniblog.files.wordpress.com/2022/03/image-3.png"><img data-attachment-id="1306" data-permalink="https://bianchini.blog/image-3/" data-orig-file="https://bianchiniblog.files.wordpress.com/2022/03/image-3.png" data-orig-size="752,452" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="image-3" data-image-description="" data-image-caption="" data-medium-file="https://bianchiniblog.files.wordpress.com/2022/03/image-3.png?w=300" data-large-file="https://bianchiniblog.files.wordpress.com/2022/03/image-3.png?w=700" src="https://bianchiniblog.files.wordpress.com/2022/03/image-3.png?w=752" alt="" class="wp-image-1306" srcset="https://bianchiniblog.files.wordpress.com/2022/03/image-3.png 752w, https://bianchiniblog.files.wordpress.com/2022/03/image-3.png?w=150 150w, https://bianchiniblog.files.wordpress.com/2022/03/image-3.png?w=300 300w" sizes="(max-width: 752px) 100vw, 752px" /></a></figure>
+
+
+
+<p>Fonte: <a href="https://www.gov.br/tesouronacional/pt-br/estatisticas-fiscais-e-planejamento/resultado-do-tesouro-nacional-rtn">STN</a></p>
+
+
+
+<p><strong>Como as despesas sujeitas a controle de fluxo estão em patamares mínimos, o cumprimento do teto de despesas depende de cortes adicionais nos investimentos, adiamento de despesas para os próximos exercícios e interpretações criativas da EC 95/2016. Como neste ano o presidente é pré candidato à reeleição, é muito provável que ocorra algo similar ao que ocorreu em dezembro de 2019 para acomodar aumento de despesas típico de ano eleitoral. Infelizmente, acredito que o posicionamento dos órgãos de controle dependerá mais da popularidade do presidente que do texto constitucional.</strong></p>
+
+
+
+<p><strong>Conclusões</strong></p>
+
+
+
+<p>i. A estabilização das despesas reais da União precede em dois anos a vigência do teto de despesas;</p>
+
+
+
+<p>ii. Desde 2015, o ano de maior aumento real de despesas foi 2019, a despeito da vigência do novo regime fiscal;</p>
+
+
+
+<p>&nbsp;iii. Como o teto de despesas é calculado com base nas despesas dos anos anteriores, a interpretação criativa de 2019 perenizou o aumento do teto de despesas;</p>
+
+
+
+<p>iv. Embora o teto de despesas tenha modificado os gastos mínimos com educação e saúde, essas despesas só ficaram abaixo do mínimo anteriormente estipulado em 2021 para educação e 2019 para saúde. Como <a href="https://bianchini.blog/2016/10/15/o-novo-regime-fiscal-e-as-vinculacoes-de-despesas-com-saude-e-educacao/">eu havia previsto neste Blog</a> quando o novo regime fiscal era uma proposta de emenda à constituição, as despesas com educação e saúde seriam inferiores aos mínimos vigentes anteriormente a partir do início desta década;</p>
+
+
+
+<p>v. Como há poucas despesas passíveis de compressão, o teto de despesas só será cumprido com cortes adicionais de investimentos, adiamento de despesas para os próximos anos ou interpretações criativas do texto constitucional, algo que eu também havia previsto em 2016 ao concluir que o teto de despesas traria “<em>maior ineficiência na administração orçamentária</em>”.</p>
+
+
+
+<p>Quem me acompanha neste Blog ou nas redes sociais sabe que defendo a necessidade de ajuste fiscal estrutural nas contas públicas brasileiras, em especial no que diz respeito às despesas previdenciárias, dado que servidores civis de entes subnacionais e militares não foram atingidos pela reforma de 2019. Embora eu reconheça que o teto de despesas foi importante para estabilizar expectativas após o i<em>mpeachment</em>, os números divulgados pelo Tesouro Nacional demonstram que o teto de despesas não foi necessário para que um importante ajuste fiscal nas despesas fosse iniciado em 2015. Além disso, a partir 2022 ele tende a criar diversas ineficiências na gestão fiscal. O próximo presidente, que desejo não ser o atual, deverá apresentar propostas de reformas fiscais que equilibrem a necessária revogação do teto de despesas com a necessidade de ancorar expectativas fiscais e estabilizar a relação dívida pública/PIB. Em breve, espero escrever neste Blog para comentar como uma medida provisória que promova acerto de contas entre o Banco Central do Brasil e o Tesouro Nacional pode simultaneamente diminuir a dívida pública e reforçar a autonomia da Autoridade Monetária concedida por meio da Lei Complementar 179/2021.</p>
+<div id="atatags-370373-6286488e08aa4">
+        <script type="text/javascript">
+            __ATA.cmd.push(function() {
+                __ATA.initVideoSlot('atatags-370373-6286488e08aa4', {
+                    sectionId: '370373',
+                    format: 'inread'
+                });
+            });
+        </script>
+    </div>			<div id="atatags-26942-6286488e08b07"></div>
+			
+			<script>
+				__ATA.cmd.push(function() {
+					__ATA.initDynamicSlot({
+						id: 'atatags-26942-6286488e08b07',
+						location: 120,
+						formFactor: '001',
+						label: {
+							text: 'Anúncios',
+						},
+						creative: {
+							reportAd: {
+								text: 'Denunciar este anúncio',
+							},
+							privacySettings: {
+								text: 'Privacidade',
+								
+							}
+						}
+					});
+				});
+			</script><div id="jp-post-flair" class="sharedaddy sd-like-enabled sd-sharing-enabled"><div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-icon-text sd-sharing"><h3 class="sd-title">Compartilhe isso:</h3><div class="sd-content"><ul><li class="share-twitter"><a rel="nofollow noopener noreferrer" data-shared="sharing-twitter-1298" class="share-twitter sd-button share-icon" href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/?share=twitter" target="_blank" title="Clique para compartilhar no Twitter"><span>Twitter</span></a></li><li class="share-facebook"><a rel="nofollow noopener noreferrer" data-shared="sharing-facebook-1298" class="share-facebook sd-button share-icon" href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/?share=facebook" target="_blank" title="Clique para compartilhar no Facebook"><span>Facebook</span></a></li><li class="share-end"></li></ul></div></div></div><div class='sharedaddy sd-block sd-like jetpack-likes-widget-wrapper jetpack-likes-widget-unloaded' id='like-post-wrapper-101840260-1298-6286488e09813' data-src='//widgets.wp.com/likes/index.html?ver=20220105#blog_id=101840260&amp;post_id=1298&amp;origin=bianchiniblog.wordpress.com&amp;obj_id=101840260-1298-6286488e09813&amp;domain=bianchini.blog' data-name='like-post-frame-101840260-1298-6286488e09813' data-title='Curtir ou reblogar'><h3 class='sd-title'>Curtir isso:</h3><div class='likes-widget-placeholder post-likes-widget-placeholder' style='height: 55px;'><span class='button'><span>Curtir</span></span> <span class="loading">Carregando...</span></div><span class='sd-text-color'></span><a class='sd-link-color'></a></div></div>			</div><!-- .entry-content -->
+
+	<div class="entry-footer">
+		<span class="cat-links">Publicado em <a href="https://bianchini.blog/category/ajuste-fiscal/" rel="category tag">Ajuste fiscal</a>, <a href="https://bianchini.blog/category/novo-regime-fiscal/" rel="category tag">Novo regime fiscal</a>, <a href="https://bianchini.blog/category/pec-241/" rel="category tag">PEC 241</a></span><span class="comments-link"><a href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/#respond">Deixe um comentário</a></span>	</div><!-- .entry-footer -->
+</article><!-- #post-## -->
+
+					<nav class="navigation post-navigation" role="navigation">
+		<h1 class="screen-reader-text">Navegação de Posts</h1>
+		<div class="nav-links">
+			<a href="https://bianchini.blog/2020/12/08/o-trade-off-entre-inflacao-e-desemprego-de-2021/" rel="prev"><span class="meta-nav">Post anterior</span>O trade-off entre inflação e desemprego de&nbsp;2021</a>		</div><!-- .nav-links -->
+	</nav><!-- .navigation -->
+	
+				
+<div id="comments" class="comments-area">
+
+	
+	
+	
+		<div id="respond" class="comment-respond">
+		<h3 id="reply-title" class="comment-reply-title">Deixe um comentário <small><a rel="nofollow" id="cancel-comment-reply-link" href="/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/#respond" style="display:none;">Cancelar resposta</a></small></h3><form action="https://bianchini.blog/wp-comments-post.php" method="post" id="commentform" class="comment-form" novalidate><input type="hidden" id="highlander_comment_nonce" name="highlander_comment_nonce" value="50278d4624" /><input type="hidden" name="_wp_http_referer" value="/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/" />
+<input type="hidden" name="hc_post_as" id="hc_post_as" value="guest" />
+
+<div class="comment-form-field comment-textarea">
+	<label for="comment">Digite seu comentário aqui...</label>
+	<div id="comment-form-comment"><textarea id="comment" name="comment" title="Digite seu comentário aqui..."></textarea></div>
+</div>
+
+<div id="comment-form-identity">
+	<div id="comment-form-nascar">
+		<p>Preencha os seus dados abaixo ou clique em um ícone para log in:</p>
+		<ul>
+			<li class="selected" style="display:none;">
+				<a href="#comment-form-guest" id="postas-guest" class="nascar-signin-link"
+				 title="Login via Convidado" 				>
+									</a>
+			</li>
+			<li>
+				<a href="#comment-form-load-service:WordPress.com" id="postas-wordpress" class="nascar-signin-link"
+				 title="Login via WordPress.com" 				>
+					<svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#0087be" d="M12.158 12.786l-2.698 7.84c.806.236 1.657.365 2.54.365 1.047 0 2.05-.18 2.986-.51-.024-.037-.046-.078-.065-.123l-2.762-7.57zM3.008 12c0 3.56 2.07 6.634 5.068 8.092L3.788 8.342c-.5 1.117-.78 2.354-.78 3.658zm15.06-.454c0-1.112-.398-1.88-.74-2.48-.456-.74-.883-1.368-.883-2.11 0-.825.627-1.595 1.51-1.595.04 0 .078.006.116.008-1.598-1.464-3.73-2.36-6.07-2.36-3.14 0-5.904 1.613-7.512 4.053.21.008.41.012.58.012.94 0 2.395-.114 2.395-.114.484-.028.54.684.057.74 0 0-.487.058-1.03.086l3.275 9.74 1.968-5.902-1.4-3.838c-.485-.028-.944-.085-.944-.085-.486-.03-.43-.77.056-.742 0 0 1.484.114 2.368.114.94 0 2.397-.114 2.397-.114.486-.028.543.684.058.74 0 0-.488.058-1.03.086l3.25 9.665.897-2.997c.456-1.17.684-2.137.684-2.907zm1.82-3.86c.04.286.06.593.06.924 0 .912-.17 1.938-.683 3.22l-2.746 7.94c2.672-1.558 4.47-4.454 4.47-7.77 0-1.564-.4-3.033-1.1-4.314zM12 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></g></svg>				</a>
+			</li>
+			<li>
+				<a href="#comment-form-load-service:Twitter" id="postas-twitter" class="nascar-signin-link"
+				 title="Login via Twitter" 				>
+					<svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#1DA1F2" d="M22.23 5.924c-.736.326-1.527.547-2.357.646.847-.508 1.498-1.312 1.804-2.27-.793.47-1.67.812-2.606.996C18.325 4.498 17.258 4 16.078 4c-2.266 0-4.103 1.837-4.103 4.103 0 .322.036.635.106.935-3.41-.17-6.433-1.804-8.457-4.287-.353.607-.556 1.312-.556 2.064 0 1.424.724 2.68 1.825 3.415-.673-.022-1.305-.207-1.86-.514v.052c0 1.988 1.415 3.647 3.293 4.023-.344.095-.707.145-1.08.145-.265 0-.522-.026-.773-.074.522 1.63 2.038 2.817 3.833 2.85-1.404 1.1-3.174 1.757-5.096 1.757-.332 0-.66-.02-.98-.057 1.816 1.164 3.973 1.843 6.29 1.843 7.547 0 11.675-6.252 11.675-11.675 0-.178-.004-.355-.012-.53.802-.578 1.497-1.3 2.047-2.124z"/></g></svg>				</a>
+			</li>
+			<li>
+				<a href="#comment-form-load-service:Facebook" id="postas-facebook" class="nascar-signin-link"
+				 title="Login via Facebook" 				>
+					<svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#3B5998" d="M20.007 3H3.993C3.445 3 3 3.445 3 3.993v16.013c0 .55.445.994.993.994h8.62v-6.97H10.27V11.31h2.346V9.31c0-2.325 1.42-3.59 3.494-3.59.993 0 1.847.073 2.096.106v2.43h-1.438c-1.128 0-1.346.537-1.346 1.324v1.734h2.69l-.35 2.717h-2.34V21h4.587c.548 0 .993-.445.993-.993V3.993c0-.548-.445-.993-.993-.993z"/></g></svg>				</a>
+			</li>
+		</ul>
+	</div>
+
+	<div id="comment-form-guest" class="comment-form-service selected">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+<a href="https://gravatar.com/site/signup/" target="_blank">				<img src="https://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=25&amp;d=identicon&amp;forcedefault=y&amp;r=G" alt="Gravatar" width="25" class="no-grav" />
+</a>			</div>
+
+				<div class="comment-form-fields">
+				<div class="comment-form-field comment-form-email">
+					<label for="email">Email <span class="required">(obrigatório)</span> <span class="nopublish">(Nunca tornar endereço público)</span></label>
+					<div class="comment-form-input"><input id="email" name="email" type="email" value="" /></div>
+				</div>
+				<div class="comment-form-field comment-form-author">
+					<label for="author">Nome <span class="required">(obrigatório)</span></label>
+					<div class="comment-form-input"><input id="author" name="author" type="text" value="" /></div>
+				</div>
+				<div class="comment-form-field comment-form-url">
+					<label for="url">Site</label>
+					<div class="comment-form-input"><input id="url" name="url" type="url" value="" /></div>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+
+	<div id="comment-form-wordpress" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="https://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=25&amp;d=identicon&amp;forcedefault=y&amp;r=G" alt="Logotipo do WordPress.com" width="25" class="no-grav" />
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="wp_avatar" id="wordpress-avatar" class="comment-meta-wordpress" value="" />
+				<input type="hidden" name="wp_user_id" id="wordpress-user_id" class="comment-meta-wordpress" value="" />
+				<input type="hidden" name="wp_access_token" id="wordpress-access_token" class="comment-meta-wordpress" value="" />
+						<p class="comment-form-posting-as pa-wordpress">
+			<strong></strong>
+			Você está comentando utilizando sua conta WordPress.com.			<span class="comment-form-log-out">
+				(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( 'wordpress' );">Sair</a>&nbsp;/&nbsp;
+				<a href="#" onclick="javascript:HighlanderComments.switchAccount();return false;">Alterar</a>&nbsp;)
+			</span>
+			<span class="pa-icon"><svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#0087be" d="M12.158 12.786l-2.698 7.84c.806.236 1.657.365 2.54.365 1.047 0 2.05-.18 2.986-.51-.024-.037-.046-.078-.065-.123l-2.762-7.57zM3.008 12c0 3.56 2.07 6.634 5.068 8.092L3.788 8.342c-.5 1.117-.78 2.354-.78 3.658zm15.06-.454c0-1.112-.398-1.88-.74-2.48-.456-.74-.883-1.368-.883-2.11 0-.825.627-1.595 1.51-1.595.04 0 .078.006.116.008-1.598-1.464-3.73-2.36-6.07-2.36-3.14 0-5.904 1.613-7.512 4.053.21.008.41.012.58.012.94 0 2.395-.114 2.395-.114.484-.028.54.684.057.74 0 0-.487.058-1.03.086l3.275 9.74 1.968-5.902-1.4-3.838c-.485-.028-.944-.085-.944-.085-.486-.03-.43-.77.056-.742 0 0 1.484.114 2.368.114.94 0 2.397-.114 2.397-.114.486-.028.543.684.058.74 0 0-.488.058-1.03.086l3.25 9.665.897-2.997c.456-1.17.684-2.137.684-2.907zm1.82-3.86c.04.286.06.593.06.924 0 .912-.17 1.938-.683 3.22l-2.746 7.94c2.672-1.558 4.47-4.454 4.47-7.77 0-1.564-.4-3.033-1.1-4.314zM12 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></g></svg></span>
+		</p>
+					</div>
+	
+		</div>
+	</div>
+
+	<div id="comment-form-twitter" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="https://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=25&amp;d=identicon&amp;forcedefault=y&amp;r=G" alt="Imagem do Twitter" width="25" class="no-grav" />
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="twitter_avatar" id="twitter-avatar" class="comment-meta-twitter" value="" />
+				<input type="hidden" name="twitter_user_id" id="twitter-user_id" class="comment-meta-twitter" value="" />
+				<input type="hidden" name="twitter_access_token" id="twitter-access_token" class="comment-meta-twitter" value="" />
+						<p class="comment-form-posting-as pa-twitter">
+			<strong></strong>
+			Você está comentando utilizando sua conta Twitter.			<span class="comment-form-log-out">
+				(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( 'twitter' );">Sair</a>&nbsp;/&nbsp;
+				<a href="#" onclick="javascript:HighlanderComments.switchAccount();return false;">Alterar</a>&nbsp;)
+			</span>
+			<span class="pa-icon"><svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#1DA1F2" d="M22.23 5.924c-.736.326-1.527.547-2.357.646.847-.508 1.498-1.312 1.804-2.27-.793.47-1.67.812-2.606.996C18.325 4.498 17.258 4 16.078 4c-2.266 0-4.103 1.837-4.103 4.103 0 .322.036.635.106.935-3.41-.17-6.433-1.804-8.457-4.287-.353.607-.556 1.312-.556 2.064 0 1.424.724 2.68 1.825 3.415-.673-.022-1.305-.207-1.86-.514v.052c0 1.988 1.415 3.647 3.293 4.023-.344.095-.707.145-1.08.145-.265 0-.522-.026-.773-.074.522 1.63 2.038 2.817 3.833 2.85-1.404 1.1-3.174 1.757-5.096 1.757-.332 0-.66-.02-.98-.057 1.816 1.164 3.973 1.843 6.29 1.843 7.547 0 11.675-6.252 11.675-11.675 0-.178-.004-.355-.012-.53.802-.578 1.497-1.3 2.047-2.124z"/></g></svg></span>
+		</p>
+					</div>
+	
+		</div>
+	</div>
+
+	<div id="comment-form-facebook" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="" alt="Foto do Facebook" width="25" class="no-grav" />
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="fb_avatar" id="facebook-avatar" class="comment-meta-facebook" value="" />
+				<input type="hidden" name="fb_user_id" id="facebook-user_id" class="comment-meta-facebook" value="" />
+				<input type="hidden" name="fb_access_token" id="facebook-access_token" class="comment-meta-facebook" value="" />
+						<p class="comment-form-posting-as pa-facebook">
+			<strong></strong>
+			Você está comentando utilizando sua conta Facebook.			<span class="comment-form-log-out">
+				(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( 'facebook' );">Sair</a>&nbsp;/&nbsp;
+				<a href="#" onclick="javascript:HighlanderComments.switchAccount();return false;">Alterar</a>&nbsp;)
+			</span>
+			<span class="pa-icon"><svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#3B5998" d="M20.007 3H3.993C3.445 3 3 3.445 3 3.993v16.013c0 .55.445.994.993.994h8.62v-6.97H10.27V11.31h2.346V9.31c0-2.325 1.42-3.59 3.494-3.59.993 0 1.847.073 2.096.106v2.43h-1.438c-1.128 0-1.346.537-1.346 1.324v1.734h2.69l-.35 2.717h-2.34V21h4.587c.548 0 .993-.445.993-.993V3.993c0-.548-.445-.993-.993-.993z"/></g></svg></span>
+		</p>
+					</div>
+	
+		</div>
+	</div>
+
+
+	<div id="comment-form-load-service" class="comment-form-service">
+		<div class="comment-form-posting-as-cancel"><a href="javascript:HighlanderComments.cancelExternalWindow();">Cancelar</a></div>
+		<p>Conectando a %s</p>
+	</div>
+
+</div>
+
+<script type="text/javascript">
+var highlander_expando_javascript = function () {
+
+	function hide( sel ) {
+		var el = document.querySelector( sel );
+		if ( el ) {
+			el.style.setProperty( 'display', 'none' );
+		}
+	}
+
+	function show( sel ) {
+		var el = document.querySelector( sel );
+		if ( el ) {
+			el.style.removeProperty( 'display' );
+		}
+	}
+
+	var input = document.createElement( 'input' );
+	var comment = document.querySelector( '#comment' );
+
+	if ( input && comment && 'placeholder' in input ) {
+		var label = document.querySelector( '.comment-textarea label' );
+		if ( label ) {
+			var text = label.textContent;
+			label.parentNode.removeChild( label );
+			comment.setAttribute( 'placeholder', text );
+		}
+	}
+
+	// Expando Mode: start small, then auto-resize on first click + text length
+	hide( '#comment-form-identity' );
+	hide( '#comment-form-subscribe' );
+	hide( '#commentform .form-submit' );
+
+	if ( comment ) {
+		comment.style.height = '10px';
+
+		var handler = function () {
+			comment.style.height = HighlanderComments.initialHeight + 'px';
+			show( '#comment-form-identity' );
+			show( '#comment-form-subscribe' );
+			show( '#commentform .form-submit' );
+			HighlanderComments.resizeCallback();
+
+			comment.removeEventListener( 'focus', handler );
+		};
+
+		comment.addEventListener( 'focus', handler );
+	}
+}
+
+if ( document.readyState !== 'loading' ) {
+	highlander_expando_javascript();
+} else {
+	document.addEventListener( 'DOMContentLoaded', highlander_expando_javascript );
+}
+
+</script>
+
+<div id="comment-form-subscribe">
+	<p class="comment-subscription-form"><input type="checkbox" name="subscribe" id="subscribe" value="subscribe" style="width: auto;"/> <label class="subscribe-label" id="subscribe-label" for="subscribe" style="display: inline;">Avise-me sobre novos comentários por email.</label></p><p class="post-subscription-form"><input type="checkbox" name="subscribe_blog" id="subscribe_blog" value="subscribe" style="width: auto;"/> <label class="subscribe-label" id="subscribe-blog-label" for="subscribe_blog"  style="display: inline;">Avise-me sobre novas publicações por email.</label></p></div>
+
+
+
+
+<p class="form-submit"><input name="submit" type="submit" id="comment-submit" class="submit" value="Publicar comentário" /> <input type='hidden' name='comment_post_ID' value='1298' id='comment_post_ID' />
+<input type='hidden' name='comment_parent' id='comment_parent' value='0' />
+</p><p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="129cea43ef" /></p>
+<input type="hidden" name="genseq" value="1652967566" />
+<p style="display: none !important;"><label>&#916;<textarea name="ak_hp_textarea" cols="45" rows="8" maxlength="100"></textarea></label><input type="hidden" id="ak_js_1" name="ak_js" value="14"/><script>document.getElementById( "ak_js_1" ).setAttribute( "value", ( new Date() ).getTime() );</script></p></form>	</div><!-- #respond -->
+	<div style="clear: both"></div>
+</div><!-- #comments -->
+
+			
+		</main><!-- #main -->
+	</div><!-- #primary -->
+
+
+<div id="secondary" class="widget-area" role="complementary">
+	<aside id="search-2" class="widget widget_search"><form role="search" method="get" class="search-form" action="https://bianchini.blog/">
+				<label>
+					<span class="screen-reader-text">Pesquisar por:</span>
+					<input type="search" class="search-field" placeholder="Pesquisar &hellip;" value="" name="s" />
+				</label>
+				<input type="submit" class="search-submit" value="Pesquisar" />
+			</form></aside>
+		<aside id="recent-posts-2" class="widget widget_recent_entries">
+		<h1 class="widget-title">Posts recentes</h1>
+		<ul>
+											<li>
+					<a href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/" aria-current="page">Afinal, o teto de despesas reduziu os recursos da educação e&nbsp;saúde?</a>
+									</li>
+											<li>
+					<a href="https://bianchini.blog/2020/12/08/o-trade-off-entre-inflacao-e-desemprego-de-2021/">O trade-off entre inflação e desemprego de&nbsp;2021</a>
+									</li>
+											<li>
+					<a href="https://bianchini.blog/2020/09/09/a-inflacao-atual-brasileira-e-um-problema-depende/">A inflação atual brasileira é um problema?&nbsp;Depende.</a>
+									</li>
+											<li>
+					<a href="https://bianchini.blog/2020/05/04/sobre-o-financiamento-do-tesouro-nacional-pelo-banco-central/">Sobre o financiamento do Tesouro Nacional pelo Banco&nbsp;Central</a>
+									</li>
+											<li>
+					<a href="https://bianchini.blog/2019/10/11/sobre-o-estudo-do-banco-mundial-que-embasa-a-proposta-de-reforma-administrativa-do-governo/">Sobre o estudo do Banco Mundial que embasa a proposta de reforma administrativa do&nbsp;governo</a>
+									</li>
+					</ul>
+
+		</aside><aside id="recent-comments-2" class="widget widget_recent_comments"><h1 class="widget-title">Comentários</h1>				<table class="recentcommentsavatar" cellspacing="0" cellpadding="0" border="0">
+					<tr><td title="Rose W" class="recentcommentsavatartop" style="height:48px; width:48px;"><a href="https://www.roseweber.com/" rel="nofollow"><img alt='' src='https://2.gravatar.com/avatar/27fc856c037664276ebfd5d223679e9c?s=48&#038;d=identicon&#038;r=G' class='avatar avatar-48' height='48' width='48' /></a></td><td class="recentcommentstexttop" style=""><a href="https://www.roseweber.com/" rel="nofollow">Rose W</a> em <a href="https://bianchini.blog/2018/09/28/a-insustentabilidade-da-pec-do-teto-de-despesas/comment-page-1/#comment-1990">A insustentabilidade da “PEC d&hellip;</a></td></tr><tr><td title="MARIA HELENA CABRERA" class="recentcommentsavatarend" style="height:48px; width:48px;"><img alt='' src='https://0.gravatar.com/avatar/999df1365cf8707d17343b68495425de?s=48&#038;d=identicon&#038;r=G' class='avatar avatar-48' height='48' width='48' /></td><td class="recentcommentstextend" style="">MARIA HELENA CABRERA em <a href="https://bianchini.blog/2020/05/04/sobre-o-financiamento-do-tesouro-nacional-pelo-banco-central/comment-page-1/#comment-1987">Sobre o financiamento do Tesou&hellip;</a></td></tr><tr><td title="W" class="recentcommentsavatarend" style="height:48px; width:48px;"><img alt='' src='https://0.gravatar.com/avatar/fff95be69440bb60c2b5c9380537fc8a?s=48&#038;d=identicon&#038;r=G' class='avatar avatar-48' height='48' width='48' /></td><td class="recentcommentstextend" style="">W em <a href="https://bianchini.blog/2020/12/08/o-trade-off-entre-inflacao-e-desemprego-de-2021/comment-page-1/#comment-1576">O trade-off entre inflação e d&hellip;</a></td></tr><tr><td title="Por que a Auditoria Cidadã não é levada a sério? Parte II (Blog do Bianchini) &#8211; Álvaro Matias" class="recentcommentsavatarend" style="height:48px; width:48px;"><a href="https://alvaromatiassa.wordpress.com/2020/10/29/por-que-a-auditoria-cidada-nao-e-levada-a-serio-parte-ii-blog-do-bianchini/" rel="nofollow"><img alt='' src='https://alvaromatiassa.files.wordpress.com/2019/01/cropped-lvaro-Matias.jpg?w=48' class='avatar avatar-48' height='48' width='48' /></a></td><td class="recentcommentstextend" style=""><a href="https://alvaromatiassa.wordpress.com/2020/10/29/por-que-a-auditoria-cidada-nao-e-levada-a-serio-parte-ii-blog-do-bianchini/" rel="nofollow">Por que a Auditoria&hellip;</a> em <a href="https://bianchini.blog/2016/01/21/por-que-a-auditoria-cidada-nao-e-levada-a-serio-ii-o-grafico-em-formato-de-pizza/comment-page-1/#comment-1496">Por que a Auditoria Cidadã não&hellip;</a></td></tr><tr><td title="Por que a Auditoria Cidadã não é levada a sério? Parte I (Blog do Bianchini) &#8211; Álvaro Matias" class="recentcommentsavatarend" style="height:48px; width:48px;"><a href="https://alvaromatiassa.wordpress.com/2020/10/29/por-que-a-auditoria-cidada-nao-e-levada-a-serio-parte-i-blog-do-bianchini/" rel="nofollow"><img alt='' src='https://alvaromatiassa.files.wordpress.com/2019/01/cropped-lvaro-Matias.jpg?w=48' class='avatar avatar-48' height='48' width='48' /></a></td><td class="recentcommentstextend" style=""><a href="https://alvaromatiassa.wordpress.com/2020/10/29/por-que-a-auditoria-cidada-nao-e-levada-a-serio-parte-i-blog-do-bianchini/" rel="nofollow">Por que a Auditoria&hellip;</a> em <a href="https://bianchini.blog/2016/01/16/por-que-a-auditoria-cidada-nao-e-levada-a-serio-i-o-valor-da-divida-nao-tem-sentido/comment-page-1/#comment-1495">Por que a Auditoria Cidadã não&hellip;</a></td></tr>				</table>
+				</aside><aside id="archives-2" class="widget widget_archive"><h1 class="widget-title">Arquivos</h1>
+			<ul>
+					<li><a href='https://bianchini.blog/2022/03/'>março 2022</a></li>
+	<li><a href='https://bianchini.blog/2020/12/'>dezembro 2020</a></li>
+	<li><a href='https://bianchini.blog/2020/09/'>setembro 2020</a></li>
+	<li><a href='https://bianchini.blog/2020/05/'>maio 2020</a></li>
+	<li><a href='https://bianchini.blog/2019/10/'>outubro 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/07/'>julho 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/06/'>junho 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/05/'>maio 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/04/'>abril 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/03/'>março 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/02/'>fevereiro 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/01/'>janeiro 2019</a></li>
+	<li><a href='https://bianchini.blog/2018/10/'>outubro 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/09/'>setembro 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/08/'>agosto 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/05/'>maio 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/04/'>abril 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/03/'>março 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/01/'>janeiro 2018</a></li>
+	<li><a href='https://bianchini.blog/2017/11/'>novembro 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/10/'>outubro 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/09/'>setembro 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/08/'>agosto 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/07/'>julho 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/04/'>abril 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/03/'>março 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/02/'>fevereiro 2017</a></li>
+	<li><a href='https://bianchini.blog/2016/12/'>dezembro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/11/'>novembro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/10/'>outubro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/09/'>setembro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/08/'>agosto 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/06/'>junho 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/05/'>maio 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/04/'>abril 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/03/'>março 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/02/'>fevereiro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/01/'>janeiro 2016</a></li>
+	<li><a href='https://bianchini.blog/2015/12/'>dezembro 2015</a></li>
+			</ul>
+
+			</aside><aside id="categories-2" class="widget widget_categories"><h1 class="widget-title">Categorias</h1>
+			<ul>
+					<li class="cat-item cat-item-4269023"><a href="https://bianchini.blog/category/ajuste-fiscal/">Ajuste fiscal</a>
+</li>
+	<li class="cat-item cat-item-18939"><a href="https://bianchini.blog/category/argentina/">Argentina</a>
+</li>
+	<li class="cat-item cat-item-69760819"><a href="https://bianchini.blog/category/auditoria-da-divida-publica/">Auditoria da Dívida Pública</a>
+</li>
+	<li class="cat-item cat-item-6935009"><a href="https://bianchini.blog/category/barreirinhas/">Barreirinhas</a>
+</li>
+	<li class="cat-item cat-item-980629"><a href="https://bianchini.blog/category/bndes/">BNDES</a>
+</li>
+	<li class="cat-item cat-item-119286966"><a href="https://bianchini.blog/category/brexit/">Brexit</a>
+</li>
+	<li class="cat-item cat-item-1508908"><a href="https://bianchini.blog/category/carga-tributaria/">Carga tributária</a>
+</li>
+	<li class="cat-item cat-item-546160323"><a href="https://bianchini.blog/category/ciclo-de-credito/">Ciclo de crédito</a>
+</li>
+	<li class="cat-item cat-item-1858004"><a href="https://bianchini.blog/category/ciro-gomes/">Ciro Gomes</a>
+</li>
+	<li class="cat-item cat-item-491582"><a href="https://bianchini.blog/category/creches/">Creches</a>
+</li>
+	<li class="cat-item cat-item-214860057"><a href="https://bianchini.blog/category/criptomoedas/">criptomoedas</a>
+</li>
+	<li class="cat-item cat-item-3031453"><a href="https://bianchini.blog/category/datafolha/">Datafolha</a>
+</li>
+	<li class="cat-item cat-item-606957"><a href="https://bianchini.blog/category/divida-publica/">Dívida pública</a>
+</li>
+	<li class="cat-item cat-item-472647"><a href="https://bianchini.blog/category/desemprego/">Desemprego</a>
+</li>
+	<li class="cat-item cat-item-704001"><a href="https://bianchini.blog/category/economia-brasileira/">Economia brasileira</a>
+</li>
+	<li class="cat-item cat-item-5207"><a href="https://bianchini.blog/category/ecuador/">Ecuador</a>
+</li>
+	<li class="cat-item cat-item-792511"><a href="https://bianchini.blog/category/educacao-infantil/">Educação infantil</a>
+</li>
+	<li class="cat-item cat-item-7277493"><a href="https://bianchini.blog/category/eleicoes-2016/">Eleições 2016</a>
+</li>
+	<li class="cat-item cat-item-150499671"><a href="https://bianchini.blog/category/eleicoes-2018/">Eleições 2018</a>
+</li>
+	<li class="cat-item cat-item-23286209"><a href="https://bianchini.blog/category/endividamento-privado/">Endividamento privado</a>
+</li>
+	<li class="cat-item cat-item-545455862"><a href="https://bianchini.blog/category/fundo-do-xi-de-agosto/">Fundo do XI de Agosto</a>
+</li>
+	<li class="cat-item cat-item-2275158"><a href="https://bianchini.blog/category/haddad/">Haddad</a>
+</li>
+	<li class="cat-item cat-item-48280"><a href="https://bianchini.blog/category/impeachment/">Impeachment</a>
+</li>
+	<li class="cat-item cat-item-980657"><a href="https://bianchini.blog/category/industria-da-multa/">Indústria da multa</a>
+</li>
+	<li class="cat-item cat-item-213945"><a href="https://bianchini.blog/category/inflacao/">Inflação</a>
+</li>
+	<li class="cat-item cat-item-39830613"><a href="https://bianchini.blog/category/juros-da-divida-publica/">Juros da dívida pública</a>
+</li>
+	<li class="cat-item cat-item-1545292"><a href="https://bianchini.blog/category/lencois-maranhenses/">Lençóis maranhenses</a>
+</li>
+	<li class="cat-item cat-item-226822"><a href="https://bianchini.blog/category/lula/">Lula</a>
+</li>
+	<li class="cat-item cat-item-1192756"><a href="https://bianchini.blog/category/manifestacoes/">Manifestações</a>
+</li>
+	<li class="cat-item cat-item-403095820"><a href="https://bianchini.blog/category/novo-regime-fiscal/">Novo regime fiscal</a>
+</li>
+	<li class="cat-item cat-item-25149326"><a href="https://bianchini.blog/category/operacoes-compromissadas/">Operações compromissadas</a>
+</li>
+	<li class="cat-item cat-item-508412768"><a href="https://bianchini.blog/category/pec-241/">PEC 241</a>
+</li>
+	<li class="cat-item cat-item-2553209"><a href="https://bianchini.blog/category/pedaladas/">Pedaladas</a>
+</li>
+	<li class="cat-item cat-item-189010"><a href="https://bianchini.blog/category/pib/">PIB</a>
+</li>
+	<li class="cat-item cat-item-7123167"><a href="https://bianchini.blog/category/pmsp/">PMSP</a>
+</li>
+	<li class="cat-item cat-item-237343"><a href="https://bianchini.blog/category/politica-monetaria/">Política monetária</a>
+</li>
+	<li class="cat-item cat-item-1616627"><a href="https://bianchini.blog/category/recessao/">Recessão</a>
+</li>
+	<li class="cat-item cat-item-1683544"><a href="https://bianchini.blog/category/reforma-da-previdencia/">Reforma da previdência</a>
+</li>
+	<li class="cat-item cat-item-4623859"><a href="https://bianchini.blog/category/reservas-internacionais/">Reservas internacionais</a>
+</li>
+	<li class="cat-item cat-item-1546592"><a href="https://bianchini.blog/category/santo-amaro-do-maranhao/">Santo Amaro do Maranhão</a>
+</li>
+	<li class="cat-item cat-item-27782"><a href="https://bianchini.blog/category/sao-paulo/">São Paulo</a>
+</li>
+	<li class="cat-item cat-item-5078"><a href="https://bianchini.blog/category/sem-categoria/">Sem categoria</a>
+</li>
+	<li class="cat-item cat-item-533940612"><a href="https://bianchini.blog/category/sobrevalorizacao-cambial/">Sobrevalorização cambial</a>
+</li>
+	<li class="cat-item cat-item-52576430"><a href="https://bianchini.blog/category/swaps-cambiais/">Swaps cambiais</a>
+</li>
+	<li class="cat-item cat-item-483236535"><a href="https://bianchini.blog/category/swaps-cambiais-2/">swaps cambiais</a>
+</li>
+	<li class="cat-item cat-item-9414010"><a href="https://bianchini.blog/category/transacoes-correntes/">Transações correntes</a>
+</li>
+	<li class="cat-item cat-item-10207"><a href="https://bianchini.blog/category/turismo/">Turismo</a>
+</li>
+	<li class="cat-item cat-item-221603"><a href="https://bianchini.blog/category/uniao-europeia/">União Europeia</a>
+</li>
+	<li class="cat-item cat-item-17923"><a href="https://bianchini.blog/category/venezuela/">Venezuela</a>
+</li>
+			</ul>
+
+			</aside><aside id="meta-2" class="widget widget_meta"><h1 class="widget-title">Meta</h1>
+		<ul>
+			<li><a href="https://wordpress.com/start/pt-br?ref=wplogin">Cadastre-se</a></li>			<li><a href="https://bianchiniblog.wordpress.com/wp-login.php">Fazer login</a></li>
+			<li><a href="https://bianchini.blog/feed/">Feed de posts</a></li>
+			<li><a href="https://bianchini.blog/comments/feed/">Feed de comentários</a></li>
+
+			<li><a href="https://wordpress.com/" title="Powered by WordPress, uma plataforma semântica de vanguarda para publicação pessoal.">WordPress.com</a></li>
+		</ul>
+
+		</aside>			<div id="atatags-286348-6286488e12da7"></div>
+			
+			<script>
+				__ATA.cmd.push(function() {
+					__ATA.initDynamicSlot({
+						id: 'atatags-286348-6286488e12da7',
+						location: 140,
+						formFactor: '003',
+						label: {
+							text: 'Anúncios',
+						},
+						creative: {
+							reportAd: {
+								text: 'Denunciar este anúncio',
+							},
+							privacySettings: {
+								text: 'Privacidade',
+								
+							}
+						}
+					});
+				});
+			</script></div><!-- #secondary -->
+
+	</div><!-- #content -->
+
+	
+<div id="tertiary" class="footer-widget-area" role="complementary">
+	<div class="wrapper">
+		<aside id="search-3" class="widget widget_search"><form role="search" method="get" class="search-form" action="https://bianchini.blog/">
+				<label>
+					<span class="screen-reader-text">Pesquisar por:</span>
+					<input type="search" class="search-field" placeholder="Pesquisar &hellip;" value="" name="s" />
+				</label>
+				<input type="submit" class="search-submit" value="Pesquisar" />
+			</form></aside>
+		<aside id="recent-posts-3" class="widget widget_recent_entries">
+		<h1 class="widget-title">Posts recentes</h1>
+		<ul>
+											<li>
+					<a href="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/" aria-current="page">Afinal, o teto de despesas reduziu os recursos da educação e&nbsp;saúde?</a>
+									</li>
+											<li>
+					<a href="https://bianchini.blog/2020/12/08/o-trade-off-entre-inflacao-e-desemprego-de-2021/">O trade-off entre inflação e desemprego de&nbsp;2021</a>
+									</li>
+											<li>
+					<a href="https://bianchini.blog/2020/09/09/a-inflacao-atual-brasileira-e-um-problema-depende/">A inflação atual brasileira é um problema?&nbsp;Depende.</a>
+									</li>
+											<li>
+					<a href="https://bianchini.blog/2020/05/04/sobre-o-financiamento-do-tesouro-nacional-pelo-banco-central/">Sobre o financiamento do Tesouro Nacional pelo Banco&nbsp;Central</a>
+									</li>
+											<li>
+					<a href="https://bianchini.blog/2019/10/11/sobre-o-estudo-do-banco-mundial-que-embasa-a-proposta-de-reforma-administrativa-do-governo/">Sobre o estudo do Banco Mundial que embasa a proposta de reforma administrativa do&nbsp;governo</a>
+									</li>
+					</ul>
+
+		</aside><aside id="recent-comments-3" class="widget widget_recent_comments"><h1 class="widget-title">Comentários</h1>				<table class="recentcommentsavatar" cellspacing="0" cellpadding="0" border="0">
+					<tr><td title="Rose W" class="recentcommentsavatartop" style="height:48px; width:48px;"><a href="https://www.roseweber.com/" rel="nofollow"><img alt='' src='https://2.gravatar.com/avatar/27fc856c037664276ebfd5d223679e9c?s=48&#038;d=identicon&#038;r=G' class='avatar avatar-48' height='48' width='48' /></a></td><td class="recentcommentstexttop" style=""><a href="https://www.roseweber.com/" rel="nofollow">Rose W</a> em <a href="https://bianchini.blog/2018/09/28/a-insustentabilidade-da-pec-do-teto-de-despesas/comment-page-1/#comment-1990">A insustentabilidade da “PEC d&hellip;</a></td></tr><tr><td title="MARIA HELENA CABRERA" class="recentcommentsavatarend" style="height:48px; width:48px;"><img alt='' src='https://0.gravatar.com/avatar/999df1365cf8707d17343b68495425de?s=48&#038;d=identicon&#038;r=G' class='avatar avatar-48' height='48' width='48' /></td><td class="recentcommentstextend" style="">MARIA HELENA CABRERA em <a href="https://bianchini.blog/2020/05/04/sobre-o-financiamento-do-tesouro-nacional-pelo-banco-central/comment-page-1/#comment-1987">Sobre o financiamento do Tesou&hellip;</a></td></tr><tr><td title="W" class="recentcommentsavatarend" style="height:48px; width:48px;"><img alt='' src='https://0.gravatar.com/avatar/fff95be69440bb60c2b5c9380537fc8a?s=48&#038;d=identicon&#038;r=G' class='avatar avatar-48' height='48' width='48' /></td><td class="recentcommentstextend" style="">W em <a href="https://bianchini.blog/2020/12/08/o-trade-off-entre-inflacao-e-desemprego-de-2021/comment-page-1/#comment-1576">O trade-off entre inflação e d&hellip;</a></td></tr><tr><td title="Por que a Auditoria Cidadã não é levada a sério? Parte II (Blog do Bianchini) &#8211; Álvaro Matias" class="recentcommentsavatarend" style="height:48px; width:48px;"><a href="https://alvaromatiassa.wordpress.com/2020/10/29/por-que-a-auditoria-cidada-nao-e-levada-a-serio-parte-ii-blog-do-bianchini/" rel="nofollow"><img alt='' src='https://alvaromatiassa.files.wordpress.com/2019/01/cropped-lvaro-Matias.jpg?w=48' class='avatar avatar-48' height='48' width='48' /></a></td><td class="recentcommentstextend" style=""><a href="https://alvaromatiassa.wordpress.com/2020/10/29/por-que-a-auditoria-cidada-nao-e-levada-a-serio-parte-ii-blog-do-bianchini/" rel="nofollow">Por que a Auditoria&hellip;</a> em <a href="https://bianchini.blog/2016/01/21/por-que-a-auditoria-cidada-nao-e-levada-a-serio-ii-o-grafico-em-formato-de-pizza/comment-page-1/#comment-1496">Por que a Auditoria Cidadã não&hellip;</a></td></tr><tr><td title="Por que a Auditoria Cidadã não é levada a sério? Parte I (Blog do Bianchini) &#8211; Álvaro Matias" class="recentcommentsavatarend" style="height:48px; width:48px;"><a href="https://alvaromatiassa.wordpress.com/2020/10/29/por-que-a-auditoria-cidada-nao-e-levada-a-serio-parte-i-blog-do-bianchini/" rel="nofollow"><img alt='' src='https://alvaromatiassa.files.wordpress.com/2019/01/cropped-lvaro-Matias.jpg?w=48' class='avatar avatar-48' height='48' width='48' /></a></td><td class="recentcommentstextend" style=""><a href="https://alvaromatiassa.wordpress.com/2020/10/29/por-que-a-auditoria-cidada-nao-e-levada-a-serio-parte-i-blog-do-bianchini/" rel="nofollow">Por que a Auditoria&hellip;</a> em <a href="https://bianchini.blog/2016/01/16/por-que-a-auditoria-cidada-nao-e-levada-a-serio-i-o-valor-da-divida-nao-tem-sentido/comment-page-1/#comment-1495">Por que a Auditoria Cidadã não&hellip;</a></td></tr>				</table>
+				</aside><aside id="archives-3" class="widget widget_archive"><h1 class="widget-title">Arquivos</h1>
+			<ul>
+					<li><a href='https://bianchini.blog/2022/03/'>março 2022</a></li>
+	<li><a href='https://bianchini.blog/2020/12/'>dezembro 2020</a></li>
+	<li><a href='https://bianchini.blog/2020/09/'>setembro 2020</a></li>
+	<li><a href='https://bianchini.blog/2020/05/'>maio 2020</a></li>
+	<li><a href='https://bianchini.blog/2019/10/'>outubro 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/07/'>julho 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/06/'>junho 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/05/'>maio 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/04/'>abril 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/03/'>março 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/02/'>fevereiro 2019</a></li>
+	<li><a href='https://bianchini.blog/2019/01/'>janeiro 2019</a></li>
+	<li><a href='https://bianchini.blog/2018/10/'>outubro 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/09/'>setembro 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/08/'>agosto 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/05/'>maio 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/04/'>abril 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/03/'>março 2018</a></li>
+	<li><a href='https://bianchini.blog/2018/01/'>janeiro 2018</a></li>
+	<li><a href='https://bianchini.blog/2017/11/'>novembro 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/10/'>outubro 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/09/'>setembro 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/08/'>agosto 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/07/'>julho 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/04/'>abril 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/03/'>março 2017</a></li>
+	<li><a href='https://bianchini.blog/2017/02/'>fevereiro 2017</a></li>
+	<li><a href='https://bianchini.blog/2016/12/'>dezembro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/11/'>novembro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/10/'>outubro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/09/'>setembro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/08/'>agosto 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/06/'>junho 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/05/'>maio 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/04/'>abril 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/03/'>março 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/02/'>fevereiro 2016</a></li>
+	<li><a href='https://bianchini.blog/2016/01/'>janeiro 2016</a></li>
+	<li><a href='https://bianchini.blog/2015/12/'>dezembro 2015</a></li>
+			</ul>
+
+			</aside><aside id="categories-3" class="widget widget_categories"><h1 class="widget-title">Categorias</h1>
+			<ul>
+					<li class="cat-item cat-item-4269023"><a href="https://bianchini.blog/category/ajuste-fiscal/">Ajuste fiscal</a>
+</li>
+	<li class="cat-item cat-item-18939"><a href="https://bianchini.blog/category/argentina/">Argentina</a>
+</li>
+	<li class="cat-item cat-item-69760819"><a href="https://bianchini.blog/category/auditoria-da-divida-publica/">Auditoria da Dívida Pública</a>
+</li>
+	<li class="cat-item cat-item-6935009"><a href="https://bianchini.blog/category/barreirinhas/">Barreirinhas</a>
+</li>
+	<li class="cat-item cat-item-980629"><a href="https://bianchini.blog/category/bndes/">BNDES</a>
+</li>
+	<li class="cat-item cat-item-119286966"><a href="https://bianchini.blog/category/brexit/">Brexit</a>
+</li>
+	<li class="cat-item cat-item-1508908"><a href="https://bianchini.blog/category/carga-tributaria/">Carga tributária</a>
+</li>
+	<li class="cat-item cat-item-546160323"><a href="https://bianchini.blog/category/ciclo-de-credito/">Ciclo de crédito</a>
+</li>
+	<li class="cat-item cat-item-1858004"><a href="https://bianchini.blog/category/ciro-gomes/">Ciro Gomes</a>
+</li>
+	<li class="cat-item cat-item-491582"><a href="https://bianchini.blog/category/creches/">Creches</a>
+</li>
+	<li class="cat-item cat-item-214860057"><a href="https://bianchini.blog/category/criptomoedas/">criptomoedas</a>
+</li>
+	<li class="cat-item cat-item-3031453"><a href="https://bianchini.blog/category/datafolha/">Datafolha</a>
+</li>
+	<li class="cat-item cat-item-606957"><a href="https://bianchini.blog/category/divida-publica/">Dívida pública</a>
+</li>
+	<li class="cat-item cat-item-472647"><a href="https://bianchini.blog/category/desemprego/">Desemprego</a>
+</li>
+	<li class="cat-item cat-item-704001"><a href="https://bianchini.blog/category/economia-brasileira/">Economia brasileira</a>
+</li>
+	<li class="cat-item cat-item-5207"><a href="https://bianchini.blog/category/ecuador/">Ecuador</a>
+</li>
+	<li class="cat-item cat-item-792511"><a href="https://bianchini.blog/category/educacao-infantil/">Educação infantil</a>
+</li>
+	<li class="cat-item cat-item-7277493"><a href="https://bianchini.blog/category/eleicoes-2016/">Eleições 2016</a>
+</li>
+	<li class="cat-item cat-item-150499671"><a href="https://bianchini.blog/category/eleicoes-2018/">Eleições 2018</a>
+</li>
+	<li class="cat-item cat-item-23286209"><a href="https://bianchini.blog/category/endividamento-privado/">Endividamento privado</a>
+</li>
+	<li class="cat-item cat-item-545455862"><a href="https://bianchini.blog/category/fundo-do-xi-de-agosto/">Fundo do XI de Agosto</a>
+</li>
+	<li class="cat-item cat-item-2275158"><a href="https://bianchini.blog/category/haddad/">Haddad</a>
+</li>
+	<li class="cat-item cat-item-48280"><a href="https://bianchini.blog/category/impeachment/">Impeachment</a>
+</li>
+	<li class="cat-item cat-item-980657"><a href="https://bianchini.blog/category/industria-da-multa/">Indústria da multa</a>
+</li>
+	<li class="cat-item cat-item-213945"><a href="https://bianchini.blog/category/inflacao/">Inflação</a>
+</li>
+	<li class="cat-item cat-item-39830613"><a href="https://bianchini.blog/category/juros-da-divida-publica/">Juros da dívida pública</a>
+</li>
+	<li class="cat-item cat-item-1545292"><a href="https://bianchini.blog/category/lencois-maranhenses/">Lençóis maranhenses</a>
+</li>
+	<li class="cat-item cat-item-226822"><a href="https://bianchini.blog/category/lula/">Lula</a>
+</li>
+	<li class="cat-item cat-item-1192756"><a href="https://bianchini.blog/category/manifestacoes/">Manifestações</a>
+</li>
+	<li class="cat-item cat-item-403095820"><a href="https://bianchini.blog/category/novo-regime-fiscal/">Novo regime fiscal</a>
+</li>
+	<li class="cat-item cat-item-25149326"><a href="https://bianchini.blog/category/operacoes-compromissadas/">Operações compromissadas</a>
+</li>
+	<li class="cat-item cat-item-508412768"><a href="https://bianchini.blog/category/pec-241/">PEC 241</a>
+</li>
+	<li class="cat-item cat-item-2553209"><a href="https://bianchini.blog/category/pedaladas/">Pedaladas</a>
+</li>
+	<li class="cat-item cat-item-189010"><a href="https://bianchini.blog/category/pib/">PIB</a>
+</li>
+	<li class="cat-item cat-item-7123167"><a href="https://bianchini.blog/category/pmsp/">PMSP</a>
+</li>
+	<li class="cat-item cat-item-237343"><a href="https://bianchini.blog/category/politica-monetaria/">Política monetária</a>
+</li>
+	<li class="cat-item cat-item-1616627"><a href="https://bianchini.blog/category/recessao/">Recessão</a>
+</li>
+	<li class="cat-item cat-item-1683544"><a href="https://bianchini.blog/category/reforma-da-previdencia/">Reforma da previdência</a>
+</li>
+	<li class="cat-item cat-item-4623859"><a href="https://bianchini.blog/category/reservas-internacionais/">Reservas internacionais</a>
+</li>
+	<li class="cat-item cat-item-1546592"><a href="https://bianchini.blog/category/santo-amaro-do-maranhao/">Santo Amaro do Maranhão</a>
+</li>
+	<li class="cat-item cat-item-27782"><a href="https://bianchini.blog/category/sao-paulo/">São Paulo</a>
+</li>
+	<li class="cat-item cat-item-5078"><a href="https://bianchini.blog/category/sem-categoria/">Sem categoria</a>
+</li>
+	<li class="cat-item cat-item-533940612"><a href="https://bianchini.blog/category/sobrevalorizacao-cambial/">Sobrevalorização cambial</a>
+</li>
+	<li class="cat-item cat-item-52576430"><a href="https://bianchini.blog/category/swaps-cambiais/">Swaps cambiais</a>
+</li>
+	<li class="cat-item cat-item-483236535"><a href="https://bianchini.blog/category/swaps-cambiais-2/">swaps cambiais</a>
+</li>
+	<li class="cat-item cat-item-9414010"><a href="https://bianchini.blog/category/transacoes-correntes/">Transações correntes</a>
+</li>
+	<li class="cat-item cat-item-10207"><a href="https://bianchini.blog/category/turismo/">Turismo</a>
+</li>
+	<li class="cat-item cat-item-221603"><a href="https://bianchini.blog/category/uniao-europeia/">União Europeia</a>
+</li>
+	<li class="cat-item cat-item-17923"><a href="https://bianchini.blog/category/venezuela/">Venezuela</a>
+</li>
+			</ul>
+
+			</aside><aside id="meta-3" class="widget widget_meta"><h1 class="widget-title">Meta</h1>
+		<ul>
+			<li><a href="https://wordpress.com/start/pt-br?ref=wplogin">Cadastre-se</a></li>			<li><a href="https://bianchiniblog.wordpress.com/wp-login.php">Fazer login</a></li>
+			<li><a href="https://bianchini.blog/feed/">Feed de posts</a></li>
+			<li><a href="https://bianchini.blog/comments/feed/">Feed de comentários</a></li>
+
+			<li><a href="https://wordpress.com/" title="Powered by WordPress, uma plataforma semântica de vanguarda para publicação pessoal.">WordPress.com</a></li>
+		</ul>
+
+		</aside>	</div><!-- .wrapper -->
+</div><!-- #tertiary -->
+
+	
+	<footer id="colophon" class="site-footer" role="contentinfo">
+		<div class="site-info">
+			<a href="https://wordpress.com/?ref=footer_blog" rel="nofollow">Blog no WordPress.com.</a>
+			
+			 		</div><!-- .site-info -->
+	</footer><!-- #colophon -->
+</div><!-- #page -->
+
+<!--  -->
+<script src='//0.gravatar.com/js/gprofiles.js?ver=202220z' id='grofiles-cards-js'></script>
+<script id='wpgroho-js-extra'>
+var WPGroHo = {"my_hash":""};
+</script>
+<script crossorigin='anonymous' type='text/javascript' src='https://s0.wp.com/wp-content/mu-plugins/gravatar-hovercards/wpgroho.js?m=1610363240h'></script>
+
+	<script>
+		// Initialize and attach hovercards to all gravatars
+		( function() {
+			function init() {
+				if ( typeof Gravatar === 'undefined' ) {
+					return;
+				}
+
+				if ( typeof Gravatar.init !== 'function' ) {
+					return;
+				}
+
+				Gravatar.profile_cb = function ( hash, id ) {
+					WPGroHo.syncProfileData( hash, id );
+				};
+
+				Gravatar.my_hash = WPGroHo.my_hash;
+				Gravatar.init( 'body', '#wp-admin-bar-my-account' );
+			}
+
+			if ( document.readyState !== 'loading' ) {
+				init();
+			} else {
+				document.addEventListener( 'DOMContentLoaded', init );
+			}
+		} )();
+	</script>
+
+		<div style="display:none">
+	<div class="grofile-hash-map-27fc856c037664276ebfd5d223679e9c">
+	</div>
+	<div class="grofile-hash-map-999df1365cf8707d17343b68495425de">
+	</div>
+	<div class="grofile-hash-map-fff95be69440bb60c2b5c9380537fc8a">
+	</div>
+	</div>
+<script id='highlander-comments-js-extra'>
+var HighlanderComments = {"loggingInText":"Conectando\u2026","submittingText":"Postando Coment\u00e1rio\u2026","postCommentText":"Publicar coment\u00e1rio","connectingToText":"Conectando a %s","commentingAsText":"%1$s: Voc\u00ea est\u00e1 comentando utilizando sua conta %2$s.","logoutText":"Sair","loginText":"Fazer login","connectURL":"https:\/\/bianchiniblog.wordpress.com\/public.api\/connect\/?action=request&domain=bianchini.blog","logoutURL":"https:\/\/bianchiniblog.wordpress.com\/wp-login.php?action=logout&_wpnonce=1bfe6cb4a9","homeURL":"https:\/\/bianchini.blog\/","postID":"1298","gravDefault":"identicon","enterACommentError":"Por favor escreva um coment\u00e1rio","enterEmailError":"Insira seu endere\u00e7o de email aqui","invalidEmailError":"Email inv\u00e1lido","enterAuthorError":"Digite o seu nome aqui","gravatarFromEmail":"Essa foto aparecer\u00e1 sempre que voc\u00ea deixar um coment\u00e1rio. Clicar para personaliz\u00e1-la.","logInToExternalAccount":"Fa\u00e7a login para usar detalhes de uma de suas conta.","change":"Alterar","changeAccount":"Alterar Conta","comment_registration":"0","userIsLoggedIn":"","isJetpack":"","text_direction":"ltr"};
+</script>
+<script crossorigin='anonymous' type='text/javascript' src='https://s0.wp.com/_static/??/wp-content/js/textarea-autosize.min.js,/wp-content/mu-plugins/highlander-comments/script.js?m=1649873911j'></script>
+		<!-- CCPA [start] -->
+		<script type="text/javascript">
+			( function () {
+
+				var setupPrivacy = function() {
+
+					// Minimal Mozilla Cookie library
+					// https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie/Simple_document.cookie_framework
+					var cookieLib = window.cookieLib = {getItem:function(e){return e&&decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*"+encodeURIComponent(e).replace(/[\-\.\+\*]/g,"\\$&")+"\\s*\\=\\s*([^;]*).*$)|^.*$"),"$1"))||null},setItem:function(e,o,n,t,r,i){if(!e||/^(?:expires|max\-age|path|domain|secure)$/i.test(e))return!1;var c="";if(n)switch(n.constructor){case Number:c=n===1/0?"; expires=Fri, 31 Dec 9999 23:59:59 GMT":"; max-age="+n;break;case String:c="; expires="+n;break;case Date:c="; expires="+n.toUTCString()}return"rootDomain"!==r&&".rootDomain"!==r||(r=(".rootDomain"===r?".":"")+document.location.hostname.split(".").slice(-2).join(".")),document.cookie=encodeURIComponent(e)+"="+encodeURIComponent(o)+c+(r?"; domain="+r:"")+(t?"; path="+t:"")+(i?"; secure":""),!0}};
+
+					// Implement IAB USP API.
+					window.__uspapi = function( command, version, callback ) {
+
+						// Validate callback.
+						if ( typeof callback !== 'function' ) {
+							return;
+						}
+
+						// Validate the given command.
+						if ( command !== 'getUSPData' || version !== 1 ) {
+							callback( null, false );
+							return;
+						}
+
+						// Check for GPC. If set, override any stored cookie.
+						if ( navigator.globalPrivacyControl ) {
+							callback( { version: 1, uspString: '1YYN' }, true );
+							return;
+						}
+
+						// Check for cookie.
+						var consent = cookieLib.getItem( 'usprivacy' );
+
+						// Invalid cookie.
+						if ( null === consent ) {
+							callback( null, false );
+							return;
+						}
+
+						// Everything checks out. Fire the provided callback with the consent data.
+						callback( { version: 1, uspString: consent }, true );
+					};
+
+					// Initialization.
+					document.addEventListener( 'DOMContentLoaded', function() {
+
+						// Internal functions.
+						var setDefaultOptInCookie = function() {
+							var value = '1YNN';
+							var domain = '.wordpress.com' === location.hostname.slice( -14 ) ? '.rootDomain' : location.hostname;
+							cookieLib.setItem( 'usprivacy', value, 365 * 24 * 60 * 60, '/', domain );
+						};
+
+						var setDefaultOptOutCookie = function() {
+							var value = '1YYN';
+							var domain = '.wordpress.com' === location.hostname.slice( -14 ) ? '.rootDomain' : location.hostname;
+							cookieLib.setItem( 'usprivacy', value, 24 * 60 * 60, '/', domain );
+						};
+
+						var setDefaultNotApplicableCookie = function() {
+							var value = '1---';
+							var domain = '.wordpress.com' === location.hostname.slice( -14 ) ? '.rootDomain' : location.hostname;
+							cookieLib.setItem( 'usprivacy', value, 24 * 60 * 60, '/', domain );
+						};
+
+						var setCcpaAppliesCookie = function( applies ) {
+							var domain = '.wordpress.com' === location.hostname.slice( -14 ) ? '.rootDomain' : location.hostname;
+							cookieLib.setItem( 'ccpa_applies', applies, 24 * 60 * 60, '/', domain );
+						}
+
+						var maybeCallDoNotSellCallback = function() {
+							if ( 'function' === typeof window.doNotSellCallback ) {
+								return window.doNotSellCallback();
+							}
+
+							return false;
+						}
+
+						// Look for usprivacy cookie first.
+						var usprivacyCookie = cookieLib.getItem( 'usprivacy' );
+
+						// Found a usprivacy cookie.
+						if ( null !== usprivacyCookie ) {
+
+							// If the cookie indicates that CCPA does not apply, then bail.
+							if ( '1---' === usprivacyCookie ) {
+								return;
+							}
+
+							// CCPA applies, so call our callback to add Do Not Sell link to the page.
+							maybeCallDoNotSellCallback();
+
+							// We're all done, no more processing needed.
+							return;
+						}
+
+						// We don't have a usprivacy cookie, so check to see if we have a CCPA applies cookie.
+						var ccpaCookie = cookieLib.getItem( 'ccpa_applies' );
+
+						// No CCPA applies cookie found, so we'll need to geolocate if this visitor is from California.
+						// This needs to happen client side because we do not have region geo data in our $SERVER headers,
+						// only country data -- therefore we can't vary cache on the region.
+						if ( null === ccpaCookie ) {
+
+							var request = new XMLHttpRequest();
+							request.open( 'GET', 'https://public-api.wordpress.com/geo/', true );
+
+							request.onreadystatechange = function () {
+								if ( 4 === this.readyState ) {
+									if ( 200 === this.status ) {
+
+										// Got a geo response. Parse out the region data.
+										var data = JSON.parse( this.response );
+										var ccpa_applies = data['region'] && data['region'].toLowerCase() === 'california';
+
+										// Set CCPA applies cookie. This keeps us from having to make a geo request too frequently.
+										setCcpaAppliesCookie( ccpa_applies );
+
+										// Check if CCPA applies to set the proper usprivacy cookie.
+										if ( ccpa_applies ) {
+											if ( maybeCallDoNotSellCallback() ) {
+												// Do Not Sell link added, so set default opt-in.
+												setDefaultOptInCookie();
+											} else {
+												// Failed showing Do Not Sell link as required, so default to opt-OUT just to be safe.
+												setDefaultOptOutCookie();
+											}
+										} else {
+											// CCPA does not apply.
+											setDefaultNotApplicableCookie();
+										}
+									} else {
+										// Could not geo, so let's assume for now that CCPA applies to be safe.
+										setCcpaAppliesCookie( true );
+										if ( maybeCallDoNotSellCallback() ) {
+											// Do Not Sell link added, so set default opt-in.
+											setDefaultOptInCookie();
+										} else {
+											// Failed showing Do Not Sell link as required, so default to opt-OUT just to be safe.
+											setDefaultOptOutCookie();
+										}
+									}
+								}
+							};
+
+							// Send the geo request.
+							request.send();
+						} else {
+							// We found a CCPA applies cookie.
+							if ( ccpaCookie === 'true' ) {
+								if ( maybeCallDoNotSellCallback() ) {
+									// Do Not Sell link added, so set default opt-in.
+									setDefaultOptInCookie();
+								} else {
+									// Failed showing Do Not Sell link as required, so default to opt-OUT just to be safe.
+									setDefaultOptOutCookie();
+								}
+							} else {
+								// CCPA does not apply.
+								setDefaultNotApplicableCookie();
+							}
+						}
+					} );
+				};
+
+				// Kickoff initialization.
+				if ( window.defQueue && defQueue.isLOHP && defQueue.isLOHP === 2020 ) {
+					defQueue.items.push( setupPrivacy );
+				} else {
+					setupPrivacy();
+				}
+
+			} )();
+		</script>
+
+		<!-- CCPA [end] -->
+		<div class="widget widget_eu_cookie_law_widget">
+<div
+	class="hide-on-button ads-active"
+	data-hide-timeout="30"
+	data-consent-expiration="180"
+	id="eu-cookie-law"
+	style="display: none"
+>
+	<form method="post">
+		<input type="submit" value="Fechar e aceitar" class="accept" />
+
+		Privacidade e cookies: Esse site utiliza cookies. Ao continuar a usar este site, você concorda com seu uso. <br />
+Para saber mais, inclusive sobre como controlar os cookies, consulte aqui:
+				<a href="https://automattic.com/cookies/" rel="nofollow">
+			Política de cookies		</a>
+ </form>
+</div>
+</div>		<script type="text/javascript">
+		( function() {
+			function init() {
+				document.body.addEventListener( 'is.post-load', function() {
+					if ( typeof __ATA.insertInlineAds === 'function' ) {
+						__ATA.insertInlineAds();
+					}
+				} );
+			}
+
+			if ( document.readyState !== 'loading' ) {
+				init();
+			} else {
+				document.addEventListener( 'DOMContentLoaded', init );
+			}
+		} )();
+		</script>	<div id="actionbar" style="display: none;"
+			class="actnbr-pub-sequential actnbr-has-follow">
+		<ul>
+								<li class="actnbr-btn actnbr-hidden">
+								<a class="actnbr-action actnbr-actn-follow " href="">
+			<svg class="gridicon gridicons-reader-follow" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 16v2h-3v3h-2v-3h-3v-2h3v-3h2v3h3zM20 2v9h-4v3h-3v4H4c-1.1 0-2-.9-2-2V2h18zM8 13v-1H4v1h4zm3-3H4v1h7v-1zm0-2H4v1h7V8zm7-4H4v2h14V4z"/></g></svg><span>Seguir</span>
+		</a>
+		<a class="actnbr-action actnbr-actn-following  no-display" href="">
+			<svg class="gridicon gridicons-reader-following" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 13.482L15.508 21 12 17.4l1.412-1.388 2.106 2.188 6.094-6.094L23 13.482zm-7.455 1.862L20 10.89V2H2v14c0 1.1.9 2 2 2h4.538l4.913-4.832 2.095 2.176zM8 13H4v-1h4v1zm3-2H4v-1h7v1zm0-2H4V8h7v1zm7-3H4V4h14v2z"/></g></svg><span>Seguindo</span>
+		</a>
+							<div class="actnbr-popover tip tip-top-left actnbr-notice" id="follow-bubble">
+							<div class="tip-arrow"></div>
+							<div class="tip-inner actnbr-follow-bubble">
+															<ul>
+											<li class="actnbr-sitename">
+			<a href="https://bianchini.blog">
+				<img alt='' src='https://secure.gravatar.com/blavatar/bab94f09b8212847d5ad2b149abfbb5b?s=50&#038;d=https%3A%2F%2Fs0.wp.com%2Fi%2Flogo%2Fwpcom-gray-white.png' class='avatar avatar-50' height='50' width='50' />				Blog do Bianchini			</a>
+		</li>
+										<form method="post" action="https://subscribe.wordpress.com" accept-charset="utf-8" style="display: none;">
+																						<div class="actnbr-follow-count">Junte-se a 71 outros seguidores</div>
+																					<div>
+										<input type="email" name="email" placeholder="Insira seu endereço de email" class="actnbr-email-field" aria-label="Insira seu endereço de email" />
+										</div>
+										<input type="hidden" name="action" value="subscribe" />
+										<input type="hidden" name="blog_id" value="101840260" />
+										<input type="hidden" name="source" value="https://bianchini.blog/2022/03/29/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude/" />
+										<input type="hidden" name="sub-type" value="actionbar-follow" />
+										<input type="hidden" id="_wpnonce" name="_wpnonce" value="8c9c6a62ed" />										<div class="actnbr-button-wrap">
+											<button type="submit" value="Cadastre-me">
+												Cadastre-me											</button>
+										</div>
+									</form>
+									<li class="actnbr-login-nudge">
+										<div>
+											Já tem uma conta do WordPress.com? <a href="https://wordpress.com/log-in?redirect_to=https%3A%2F%2Fr-login.wordpress.com%2Fremote-login.php%3Faction%3Dlink%26back%3Dhttps%253A%252F%252Fbianchini.blog%252F2022%252F03%252F29%252Fafinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude%252F">Faça login agora.</a>										</div>
+									</li>
+								</ul>
+															</div>
+						</div>
+					</li>
+							<li class="actnbr-ellipsis actnbr-hidden">
+				<svg class="gridicon gridicons-ellipsis" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M7 12c0 1.104-.896 2-2 2s-2-.896-2-2 .896-2 2-2 2 .896 2 2zm12-2c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm-7 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2z"/></g></svg>				<div class="actnbr-popover tip tip-top-left actnbr-more">
+					<div class="tip-arrow"></div>
+					<div class="tip-inner">
+						<ul>
+									<li class="actnbr-sitename">
+			<a href="https://bianchini.blog">
+				<img alt='' src='https://secure.gravatar.com/blavatar/bab94f09b8212847d5ad2b149abfbb5b?s=50&#038;d=https%3A%2F%2Fs0.wp.com%2Fi%2Flogo%2Fwpcom-gray-white.png' class='avatar avatar-50' height='50' width='50' />				Blog do Bianchini			</a>
+		</li>
+								<li class="actnbr-folded-customize">
+								<a href="https://bianchiniblog.wordpress.com/wp-admin/customize.php?url=https%3A%2F%2Fbianchiniblog.wordpress.com%2F2022%2F03%2F29%2Fafinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude%2F">
+									<svg class="gridicon gridicons-customize" height="20" width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M2 6c0-1.505.78-3.08 2-4 0 .845.69 2 2 2 1.657 0 3 1.343 3 3 0 .386-.08.752-.212 1.09.74.594 1.476 1.19 2.19 1.81L8.9 11.98c-.62-.716-1.214-1.454-1.807-2.192C6.753 9.92 6.387 10 6 10c-2.21 0-4-1.79-4-4zm12.152 6.848l1.34-1.34c.607.304 1.283.492 2.008.492 2.485 0 4.5-2.015 4.5-4.5 0-.725-.188-1.4-.493-2.007L18 9l-2-2 3.507-3.507C18.9 3.188 18.225 3 17.5 3 15.015 3 13 5.015 13 7.5c0 .725.188 1.4.493 2.007L3 20l2 2 6.848-6.848c1.885 1.928 3.874 3.753 5.977 5.45l1.425 1.148 1.5-1.5-1.15-1.425c-1.695-2.103-3.52-4.092-5.448-5.977z"/></g></svg>									<span>Personalizar</span>
+								</a>
+							</li>
+																<li class="actnbr-folded-follow">
+												<a class="actnbr-action actnbr-actn-follow " href="">
+			<svg class="gridicon gridicons-reader-follow" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 16v2h-3v3h-2v-3h-3v-2h3v-3h2v3h3zM20 2v9h-4v3h-3v4H4c-1.1 0-2-.9-2-2V2h18zM8 13v-1H4v1h4zm3-3H4v1h7v-1zm0-2H4v1h7V8zm7-4H4v2h14V4z"/></g></svg><span>Seguir</span>
+		</a>
+		<a class="actnbr-action actnbr-actn-following  no-display" href="">
+			<svg class="gridicon gridicons-reader-following" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 13.482L15.508 21 12 17.4l1.412-1.388 2.106 2.188 6.094-6.094L23 13.482zm-7.455 1.862L20 10.89V2H2v14c0 1.1.9 2 2 2h4.538l4.913-4.832 2.095 2.176zM8 13H4v-1h4v1zm3-2H4v-1h7v1zm0-2H4V8h7v1zm7-3H4V4h14v2z"/></g></svg><span>Seguindo</span>
+		</a>
+										</li>
+																	<li class="actnbr-signup"><a href="https://wordpress.com/start/">Registre-se</a></li>
+									<li class="actnbr-login"><a href="https://wordpress.com/log-in?redirect_to=https%3A%2F%2Fr-login.wordpress.com%2Fremote-login.php%3Faction%3Dlink%26back%3Dhttps%253A%252F%252Fbianchini.blog%252F2022%252F03%252F29%252Fafinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude%252F">Fazer login</a></li>
+																	<li class="actnbr-shortlink"><a href="https://wp.me/p6TjiQ-kW">Copiar link curto</a></li>
+																	<li class="flb-report"><a href="http://en.wordpress.com/abuse/">Denunciar este conteúdo</a></li>
+																	<li class="actnbr-reader">
+										<a href="https://wordpress.com/read/blogs/101840260/posts/1298">
+											Ver post no Leitor										</a>
+									</li>
+																	<li class="actnbr-subs">
+										<a href="https://subscribe.wordpress.com/">Gerenciar assinaturas</a>
+									</li>
+																		<li class="actnbr-fold"><a href="">Esconder esta barra</a></li>
+															</ul>
+					</div>
+				</div>
+			</li>
+		</ul>
+	</div>
+	
+<script>
+window.addEventListener( "load", function( event ) {
+	var link = document.createElement( "link" );
+	link.href = "https://s0.wp.com/wp-content/mu-plugins/actionbar/actionbar.css?v=20210915";
+	link.type = "text/css";
+	link.rel = "stylesheet";
+	document.head.appendChild( link );
+
+	var script = document.createElement( "script" );
+	script.src = "https://s0.wp.com/wp-content/mu-plugins/actionbar/actionbar.js?v=20220329";
+	script.defer = true;
+	document.body.appendChild( script );
+} );
+</script>
+
+			<div id="jp-carousel-loading-overlay">
+			<div id="jp-carousel-loading-wrapper">
+				<span id="jp-carousel-library-loading">&nbsp;</span>
+			</div>
+		</div>
+		<div class="jp-carousel-overlay" style="display: none;">
+
+		<div class="jp-carousel-container">
+			<!-- The Carousel Swiper -->
+			<div
+				class="jp-carousel-wrap swiper-container jp-carousel-swiper-container jp-carousel-transitions"
+				itemscope
+				itemtype="https://schema.org/ImageGallery">
+				<div class="jp-carousel swiper-wrapper"></div>
+				<div class="jp-swiper-button-prev swiper-button-prev">
+					<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<mask id="maskPrev" mask-type="alpha" maskUnits="userSpaceOnUse" x="8" y="6" width="9" height="12">
+							<path d="M16.2072 16.59L11.6496 12L16.2072 7.41L14.8041 6L8.8335 12L14.8041 18L16.2072 16.59Z" fill="white"/>
+						</mask>
+						<g mask="url(#maskPrev)">
+							<rect x="0.579102" width="23.8823" height="24" fill="#FFFFFF"/>
+						</g>
+					</svg>
+				</div>
+				<div class="jp-swiper-button-next swiper-button-next">
+					<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<mask id="maskNext" mask-type="alpha" maskUnits="userSpaceOnUse" x="8" y="6" width="8" height="12">
+							<path d="M8.59814 16.59L13.1557 12L8.59814 7.41L10.0012 6L15.9718 12L10.0012 18L8.59814 16.59Z" fill="white"/>
+						</mask>
+						<g mask="url(#maskNext)">
+							<rect x="0.34375" width="23.8822" height="24" fill="#FFFFFF"/>
+						</g>
+					</svg>
+				</div>
+			</div>
+			<!-- The main close buton -->
+			<div class="jp-carousel-close-hint">
+				<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<mask id="maskClose" mask-type="alpha" maskUnits="userSpaceOnUse" x="5" y="5" width="15" height="14">
+						<path d="M19.3166 6.41L17.9135 5L12.3509 10.59L6.78834 5L5.38525 6.41L10.9478 12L5.38525 17.59L6.78834 19L12.3509 13.41L17.9135 19L19.3166 17.59L13.754 12L19.3166 6.41Z" fill="white"/>
+					</mask>
+					<g mask="url(#maskClose)">
+						<rect x="0.409668" width="23.8823" height="24" fill="#FFFFFF"/>
+					</g>
+				</svg>
+			</div>
+			<!-- Image info, comments and meta -->
+			<div class="jp-carousel-info">
+				<div class="jp-carousel-info-footer">
+					<div class="jp-carousel-pagination-container">
+						<div class="jp-swiper-pagination swiper-pagination"></div>
+						<div class="jp-carousel-pagination"></div>
+					</div>
+					<div class="jp-carousel-photo-title-container">
+						<h2 class="jp-carousel-photo-caption"></h2>
+					</div>
+					<div class="jp-carousel-photo-icons-container">
+						<a href="#" class="jp-carousel-icon-btn jp-carousel-icon-info" aria-label="Alternar visibilidade de metadados de imagem">
+							<span class="jp-carousel-icon">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="maskInfo" mask-type="alpha" maskUnits="userSpaceOnUse" x="2" y="2" width="21" height="20">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M12.7537 2C7.26076 2 2.80273 6.48 2.80273 12C2.80273 17.52 7.26076 22 12.7537 22C18.2466 22 22.7046 17.52 22.7046 12C22.7046 6.48 18.2466 2 12.7537 2ZM11.7586 7V9H13.7488V7H11.7586ZM11.7586 11V17H13.7488V11H11.7586ZM4.79292 12C4.79292 16.41 8.36531 20 12.7537 20C17.142 20 20.7144 16.41 20.7144 12C20.7144 7.59 17.142 4 12.7537 4C8.36531 4 4.79292 7.59 4.79292 12Z" fill="white"/>
+									</mask>
+									<g mask="url(#maskInfo)">
+										<rect x="0.8125" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+							</span>
+						</a>
+												<a href="#" class="jp-carousel-icon-btn jp-carousel-icon-comments" aria-label="Alternar visibilidade de comentários em imagem">
+							<span class="jp-carousel-icon">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="maskComments" mask-type="alpha" maskUnits="userSpaceOnUse" x="2" y="2" width="21" height="20">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M4.3271 2H20.2486C21.3432 2 22.2388 2.9 22.2388 4V16C22.2388 17.1 21.3432 18 20.2486 18H6.31729L2.33691 22V4C2.33691 2.9 3.2325 2 4.3271 2ZM6.31729 16H20.2486V4H4.3271V18L6.31729 16Z" fill="white"/>
+									</mask>
+									<g mask="url(#maskComments)">
+										<rect x="0.34668" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+
+								<span class="jp-carousel-has-comments-indicator" aria-label="Esta imagem contém comentários."></span>
+							</span>
+						</a>
+											</div>
+				</div>
+				<div class="jp-carousel-info-extra">
+					<div class="jp-carousel-info-content-wrapper">
+						<div class="jp-carousel-photo-title-container">
+							<h2 class="jp-carousel-photo-title"></h2>
+						</div>
+						<div class="jp-carousel-comments-wrapper">
+															<div id="jp-carousel-comments-loading">
+									<span>Carregando comentários...</span>
+								</div>
+								<div class="jp-carousel-comments"></div>
+								<div id="jp-carousel-comment-form-container">
+									<span id="jp-carousel-comment-form-spinner">&nbsp;</span>
+									<div id="jp-carousel-comment-post-results"></div>
+																														<form id="jp-carousel-comment-form">
+												<label for="jp-carousel-comment-form-comment-field" class="screen-reader-text">Escreva um Comentário</label>
+												<textarea
+													name="comment"
+													class="jp-carousel-comment-form-field jp-carousel-comment-form-textarea"
+													id="jp-carousel-comment-form-comment-field"
+													placeholder="Escreva um Comentário"
+												></textarea>
+												<div id="jp-carousel-comment-form-submit-and-info-wrapper">
+													<div id="jp-carousel-comment-form-commenting-as">
+																													<fieldset>
+																<label for="jp-carousel-comment-form-email-field">E-mail (obrigatório)</label>
+																<input type="text" name="email" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-email-field" />
+															</fieldset>
+															<fieldset>
+																<label for="jp-carousel-comment-form-author-field">Nome (obrigatório)</label>
+																<input type="text" name="author" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-author-field" />
+															</fieldset>
+															<fieldset>
+																<label for="jp-carousel-comment-form-url-field">Site</label>
+																<input type="text" name="url" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-url-field" />
+															</fieldset>
+																											</div>
+													<input
+														type="submit"
+														name="submit"
+														class="jp-carousel-comment-form-button"
+														id="jp-carousel-comment-form-button-submit"
+														value="Publicar comentário" />
+												</div>
+											</form>
+																											</div>
+													</div>
+						<div class="jp-carousel-image-meta">
+							<div class="jp-carousel-title-and-caption">
+								<div class="jp-carousel-photo-info">
+									<h3 class="jp-carousel-caption" itemprop="caption description"></h3>
+								</div>
+
+								<div class="jp-carousel-photo-description"></div>
+							</div>
+							<ul class="jp-carousel-image-exif" style="display: none;"></ul>
+							<a class="jp-carousel-image-download" target="_blank" style="display: none;">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="3" y="3" width="19" height="18">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M5.84615 5V19H19.7775V12H21.7677V19C21.7677 20.1 20.8721 21 19.7775 21H5.84615C4.74159 21 3.85596 20.1 3.85596 19V5C3.85596 3.9 4.74159 3 5.84615 3H12.8118V5H5.84615ZM14.802 5V3H21.7677V10H19.7775V6.41L9.99569 16.24L8.59261 14.83L18.3744 5H14.802Z" fill="white"/>
+									</mask>
+									<g mask="url(#mask0)">
+										<rect x="0.870605" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+								<span class="jp-carousel-download-text"></span>
+							</a>
+							<div class="jp-carousel-image-map" style="display: none;"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		</div>
+		
+	<script type="text/javascript">
+		window.WPCOM_sharing_counts = {"https:\/\/bianchini.blog\/2022\/03\/29\/afinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude\/":1298};
+	</script>
+				<link rel='stylesheet' id='all-css-0-3' href='https://s0.wp.com/_static/??/wp-content/mu-plugins/carousel/swiper-bundle.css,/wp-content/mu-plugins/carousel/jetpack-carousel.css?m=1630955947j&cssminify=yes' type='text/css' media='all' />
+<script id='comment-like-js-extra'>
+var comment_like_text = {"loading":"Carregando...","swipeUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/comment-likes\/js\/lib\/swipe.js?ver=20131008"};
+</script>
+<script id='coblocks-lightbox-js-extra'>
+var coblocksLigthboxData = {"closeLabel":"Fechar galeria","leftLabel":"Anterior","rightLabel":"Pr\u00f3ximo"};
+</script>
+<script id='jetpack-carousel-js-extra'>
+var jetpackSwiperLibraryPath = {"url":"\/wp-content\/mu-plugins\/carousel\/swiper-bundle.js"};
+var jetpackCarouselStrings = {"widths":[370,700,1000,1200,1400,2000],"is_logged_in":"","lang":"pt","ajaxurl":"https:\/\/bianchini.blog\/wp-admin\/admin-ajax.php","nonce":"5e373d61f4","display_exif":"1","display_comments":"1","single_image_gallery":"1","single_image_gallery_media_file":"","background_color":"black","comment":"Coment\u00e1rio","post_comment":"Publicar coment\u00e1rio","write_comment":"Escreva um Coment\u00e1rio","loading_comments":"Carregando coment\u00e1rios...","download_original":"Visualizar tamanho original <span class=\"photo-size\">{0}<span class=\"photo-size-times\">\u00d7<\/span>{1}<\/span>","no_comment_text":"Certifique-se de enviar algum texto com o seu coment\u00e1rio.","no_comment_email":"Informe um endere\u00e7o de e-mail para comentar.","no_comment_author":"Forne\u00e7a seu nome para comentar.","comment_post_error":"Desculpe, mas ocorreu um erro ao postar seu coment\u00e1rio. Tente novamente mais tarde.","comment_approved":"Seu coment\u00e1rio foi aprovado.","comment_unapproved":"Seu coment\u00e1rio est\u00e1 aguardando modera\u00e7\u00e3o.","camera":"C\u00e2mera","aperture":"Abertura","shutter_speed":"Velocidade do Obturador","focal_length":"Comprimento Focal","copyright":"Direito autoral","comment_registration":"0","require_name_email":"1","login_url":"https:\/\/bianchiniblog.wordpress.com\/wp-login.php?redirect_to=https%3A%2F%2Fbianchini.blog%2F2022%2F03%2F29%2Fafinal-o-teto-de-despesas-reduziu-os-recursos-da-educacao-e-saude%2F","blog_id":"101840260","meta_data":["camera","aperture","shutter_speed","focal_length","copyright"],"stats_query_args":"blog=101840260&v=wpcom&tz=-3&user_id=0&subd=bianchiniblog","is_public":"1"};
+</script>
+<script id='sharing-js-js-extra'>
+var sharing_js_options = {"lang":"en","counts":"1","is_stats_active":"1"};
+</script>
+<script crossorigin='anonymous' type='text/javascript' src='https://s0.wp.com/_static/??-eJyVkd1OwzAMhV+INOs0Jm4Qz+KmXus2f8TOCm+PUTWGKlSNqyT2+Wwfxy7ZuBQFo9iJbY9Xcpg/momf7K9UqCb7OlBku1A/oLDFqtk0ExoPixUM2YPgJr5Tx9Os6veKFUeIvceyI3YpBA2ZFZo2gS14pzqf3Mz22LQvTWuYdEg0Ba9Na3tiWSutIi01jNKlH+8Una/92q7GHgu7VLAJFLf9ZMSgulw7y6iOohD4byzClQYQSo8jMtbQRSD/MMEzZR0+zuaSXGVzoT8t3DZWMPvPf7m4v3Z+CHotaTooNgALFr0ZKaCL3ftWKKkyaheUrFpzCzzAmCWrpc1zh8uJxVw8ULE8QqE43E6F3sJre34+tofD+XScvgAxXCeU'></script>
+<script type='text/javascript'>
+var windowOpen;
+			( function () {
+				function matches( el, sel ) {
+					return !! (
+						el.matches && el.matches( sel ) ||
+						el.msMatchesSelector && el.msMatchesSelector( sel )
+					);
+				}
+
+				document.body.addEventListener( 'click', function ( event ) {
+					if ( ! event.target ) {
+						return;
+					}
+
+					var el;
+					if ( matches( event.target, 'a.share-twitter' ) ) {
+						el = event.target;
+					} else if ( event.target.parentNode && matches( event.target.parentNode, 'a.share-twitter' ) ) {
+						el = event.target.parentNode;
+					}
+
+					if ( el ) {
+						event.preventDefault();
+
+						// If there's another sharing window open, close it.
+						if ( typeof windowOpen !== 'undefined' ) {
+							windowOpen.close();
+						}
+						windowOpen = window.open( el.getAttribute( 'href' ), 'wpcomtwitter', 'menubar=1,resizable=1,width=600,height=350' );
+						return false;
+					}
+				} );
+			} )();
+var windowOpen;
+			( function () {
+				function matches( el, sel ) {
+					return !! (
+						el.matches && el.matches( sel ) ||
+						el.msMatchesSelector && el.msMatchesSelector( sel )
+					);
+				}
+
+				document.body.addEventListener( 'click', function ( event ) {
+					if ( ! event.target ) {
+						return;
+					}
+
+					var el;
+					if ( matches( event.target, 'a.share-facebook' ) ) {
+						el = event.target;
+					} else if ( event.target.parentNode && matches( event.target.parentNode, 'a.share-facebook' ) ) {
+						el = event.target.parentNode;
+					}
+
+					if ( el ) {
+						event.preventDefault();
+
+						// If there's another sharing window open, close it.
+						if ( typeof windowOpen !== 'undefined' ) {
+							windowOpen.close();
+						}
+						windowOpen = window.open( el.getAttribute( 'href' ), 'wpcomfacebook', 'menubar=1,resizable=1,width=600,height=400' );
+						return false;
+					}
+				} );
+			} )();
+</script>
+<script type="text/javascript">
+// <![CDATA[
+(function() {
+try{
+  if ( window.external &&'msIsSiteMode' in window.external) {
+    if (window.external.msIsSiteMode()) {
+      var jl = document.createElement('script');
+      jl.type='text/javascript';
+      jl.async=true;
+      jl.src='/wp-content/plugins/ie-sitemode/custom-jumplist.php';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(jl, s);
+    }
+  }
+}catch(e){}
+})();
+// ]]>
+</script>	<iframe src='https://widgets.wp.com/likes/master.html?ver=20220105#ver=20220105&amp;lang=pt-br&amp;lang_ver=1629890925&amp;origin=https://bianchini.blog' scrolling='no' id='likes-master' name='likes-master' style='display:none;'></iframe>
+	<div id='likes-other-gravatars'>
+		<div class="likes-text">
+			<span>%d</span> blogueiros gostam disto:		</div>
+		<ul class="wpl-avatars sd-like-gravatars"></ul>
+	</div>
+
+		<script src="//stats.wp.com/w.js?63" defer></script> <script type="text/javascript">
+_tkq = window._tkq || [];
+_stq = window._stq || [];
+_tkq.push(['storeContext', {'blog_id':'101840260','blog_tz':'-3','user_lang':'pt-br','blog_lang':'pt-br','user_id':'0'}]);
+_stq.push(['view', {'blog':'101840260','v':'wpcom','tz':'-3','user_id':'0','post':'1298','subd':'bianchiniblog'}]);
+_stq.push(['extra', {'crypt':'UE5XaGUuOTlwaD85flAmcm1mcmZsaDhkV11YdWtpP0NsWnVkPS9sL0ViLndld3BoSVhfenxESDRhV2l4M1p+LXxqRzQmNFhvbVd2ZGlFSkEydTQzSnVJTVpUUzFfYlovRndCaz9YT0xDZXZaekVDLFJQTTlaL2grNkNSYUllK0tbMHBZV3ExdFBkYk1bdWI5NzZxdGxfY09FOE9ENkNsQjElXyt+WXlJUnZWdnIweG5oTWhXaX5VQ1ZkRTRNN3NRRXhQbkd+VTgmVDdIb11XWDFybUU0c2laLG40Ym1yOEp8M1h8OFlMaElWMm91cUx5Q19kMltCdWpkNUdJSnFrWGw3cy54QTdBVjc2U0hOZ1UyV3U1PTQ1NmpbaGFoMk54UVAlczdwaE9PaGVMYQ=='}]);
+_stq.push([ 'clickTrackerInit', '101840260', '1298' ]);
+	</script>
+<noscript><img src="https://pixel.wp.com/b.gif?v=noscript" style="height:1px;width:1px;overflow:hidden;position:absolute;bottom:1px;" alt="" /></noscript>
+<script>
+if ( 'object' === typeof wpcom_mobile_user_agent_info ) {
+
+	wpcom_mobile_user_agent_info.init();
+	var mobileStatsQueryString = "";
+	
+	if( false !== wpcom_mobile_user_agent_info.matchedPlatformName )
+		mobileStatsQueryString += "&x_" + 'mobile_platforms' + '=' + wpcom_mobile_user_agent_info.matchedPlatformName;
+	
+	if( false !== wpcom_mobile_user_agent_info.matchedUserAgentName )
+		mobileStatsQueryString += "&x_" + 'mobile_devices' + '=' + wpcom_mobile_user_agent_info.matchedUserAgentName;
+	
+	if( wpcom_mobile_user_agent_info.isIPad() )
+		mobileStatsQueryString += "&x_" + 'ipad_views' + '=' + 'views';
+
+	if( "" != mobileStatsQueryString ) {
+		new Image().src = document.location.protocol + '//pixel.wp.com/g.gif?v=wpcom-no-pv' + mobileStatsQueryString + '&baba=' + Math.random();
+	}
+	
+}
+</script>
+</body>
+</html>
+<!--
+	generated in 0.235 seconds
+	139515 bytes batcached for 300 seconds
+-->
